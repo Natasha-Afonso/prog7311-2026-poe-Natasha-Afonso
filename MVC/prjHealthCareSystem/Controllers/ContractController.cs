@@ -40,6 +40,14 @@ namespace prjHealthCareSystem.Controllers
         
     }
 
+
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+
     [HttpPost]
             public async Task<IActionResult> Create(Contract contract, IFormFile? upload)
             {
