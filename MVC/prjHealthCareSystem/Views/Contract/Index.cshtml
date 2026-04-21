@@ -2,7 +2,32 @@
 
 <h2>Contracts</h2>
 <p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
+<form method="get"asp-action="Index">
+    <div class="bg-white rounded-4 shadow-lg p-4 mx-auto" style="max-width:700px;width: 145%;">
+   
 
+          <div class="w-full md:w-auto">
+     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">From Date</label>
+     <input type="date" name="startTime" value="@DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd")"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all text-gray-700" />
+ </div>
+
+ <div class="w-full md:w-auto">
+     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">To Date</label>
+     <input type="date" name="endDateTime" value="@DateTime.Now.ToString("yyyy-MM-dd")"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all text-gray-700" />
+ </div>
+              
+    
+   
+     <button type="submit" class="w-full md:w-auto px-6 py-2 bg-[#2DD4BF] hover:bg-teal-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+         <span class="material-icons text-sm">description</span>
+         Show Contracts
+     </button>
+ </div>
+</div>
+</form>
+  
 <table class="table table-striped">
     <thead>
         <tr>

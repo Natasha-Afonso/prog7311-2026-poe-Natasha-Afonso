@@ -20,6 +20,8 @@ namespace prjHealthCareSystem.Controllers
 
         public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status, string signedConsentPath)
         {
+
+            
             var search = _context.Contracts //DbSet<Contract>
             .Include(c => c.Client).AsQueryable();
 
