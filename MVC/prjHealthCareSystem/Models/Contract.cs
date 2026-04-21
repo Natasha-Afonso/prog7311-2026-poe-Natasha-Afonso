@@ -17,7 +17,7 @@ public class Contract
     public DateTime EndDate { get; set; }
 
     public string Status { get; set; } = "Draft"; //Default it will be drafted
-    public string ServiceLevel { get; set; }
+    public string ServiceLevel { get; set; } = "Basic"; //Default it will be basic
     public string? SignedConsentPath { get; set; }
 
 

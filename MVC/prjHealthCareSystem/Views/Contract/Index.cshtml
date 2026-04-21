@@ -30,6 +30,7 @@
                     <a href="@item.SignedConsentPath" target="_blank" class="badge bg-info text-decoration-none">View PDF</a>
                 }
             </td>
+            <td>@item.ServiceLevel</td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>

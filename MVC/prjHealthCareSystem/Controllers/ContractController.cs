@@ -18,7 +18,7 @@ namespace prjHealthCareSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status)
+        public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status, string signedConsentPath)
         {
             var search = _context.Contracts //DbSet<Contract>
             .Include(c => c.Client).AsQueryable();
@@ -36,6 +36,16 @@ namespace prjHealthCareSystem.Controllers
                 search= search.Where(p => p.Status == status);
 
             }
+
+//search pdfs
+ if(!string.IsNullOrEmpty(signedConsentPath))
+            
+            {
+                search= search.Where(p => p.SignedConsentPath == signedConsentPath);
+
+            }
+
+
             return View(await search.ToListAsync());
         
     }
