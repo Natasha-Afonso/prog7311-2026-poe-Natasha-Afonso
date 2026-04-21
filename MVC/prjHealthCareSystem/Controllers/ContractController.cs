@@ -44,6 +44,7 @@ namespace prjHealthCareSystem.Controllers
 
         public IActionResult Create()
         {
+                 ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name");
             return View();
         }
 
@@ -84,7 +85,7 @@ namespace prjHealthCareSystem.Controllers
             
             }
  //Repopulate the patient dropdown so t doesn't break when we reload the page
-    ViewData["PatientId"] = new SelectList(_context.Clients, "Id", "Name", contract.ClientId);
+    ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name", contract.ClientId);
              
         //Send back to the form
             return View(contract);
@@ -103,7 +104,7 @@ namespace prjHealthCareSystem.Controllers
             }
 
 
-            ViewData["PatientId"] = new SelectList(_context.Clients, "Id", "Name",
+            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name",
              contract.ClientId);
             return View(contract);
         }
