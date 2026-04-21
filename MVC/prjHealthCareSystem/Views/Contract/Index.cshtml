@@ -1,0 +1,40 @@
+@model IEnumerable<prjHealthCareSystem.Models.Contract>
+
+<h2>Contracts</h2>
+<p><a asp-action="Create" class="btn btn-primary">Create New</a></p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+           
+            <th>Policy Name</th>
+            <th>Patient Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Consent Form</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+          
+            <td class="fw-bold">@item.ContractName</td>
+            <td>@item.Client?.Name</td>
+            <td>@item.StartDate.ToShortDateString()</td>
+            <td>@item.EndDate.ToShortDateString()</td>
+            <td>@item.Status</td>
+            <td>
+                @if (!string.IsNullOrEmpty(item.SignedConsentPath)) {
+                    <a href="@item.SignedConsentPath" target="_blank" class="badge bg-info text-decoration-none">View PDF</a>
+                }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

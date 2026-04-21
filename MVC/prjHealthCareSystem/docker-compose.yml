@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # The Database Container
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password@1!
+    ports:
+      - "14333:1433" # Exposes the database to your local machine so you can view it
+    volumes:
+      - sql_data:/var/opt/mssql # Saves your database data so it isn't lost on restart
+
+  # The Web App Container
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Maps port 8080 on your machine to port 8080 in the container
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+
+volumes:
+  sql_data:

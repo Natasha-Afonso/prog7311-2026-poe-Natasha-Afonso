@@ -1,0 +1,56 @@
+@model IEnumerable<prjHealthCareSystem.Models.ServiceRequest>
+
+@{
+    ViewData["Title"] = "Service Requests List";
+}
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h1>Service Requests</h1>
+    <a asp-action="Create" class="btn btn-primary">Create New Request</a>
+</div>
+
+<table class="table table-hover shadow-sm bg-white rounded">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+           
+            <th>Billing Policy & Patient</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.Cost)</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+              
+                <strong>@item.Contract?.ContractName</strong>
+                <br />
+                <small class="text-muted">Patient: @item.Contract?.Client?.Name</small>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @item.Cost.ToString("C")
+            </td>
+            <td>
+                @{
+                    var statusClass = item.Status == "Scheduled" ? "bg-primary" : "bg-success";
+                }
+                <span class="badge @statusClass">@item.Status</span>
+            </td>
+            <td class="text-center">
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
