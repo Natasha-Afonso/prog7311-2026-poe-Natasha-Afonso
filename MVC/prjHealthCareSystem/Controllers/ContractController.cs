@@ -21,6 +21,7 @@ namespace prjHealthCareSystem.Controllers
         public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status, string signedConsentPath)
         {
         string role = HttpContext.Session.GetString("AccountRole");
+        ViewBag.AccountRole = role; // Pass the role to the view
         if (role == "Admin")
             {
                 
@@ -35,12 +36,17 @@ namespace prjHealthCareSystem.Controllers
                 p.StartDate >= startTime && p.EndDate <= endDateTime); //IQueryable<Contract>
             }
 
+   
             //Search Status
             if(!string.IsNullOrEmpty(status))
             {
                 search= search.Where(p => p.Status == status);
 
             }
+
+            ViewBag.StatusFilter = new SelectList(new[] 
+  { "Draft", "Active", "Expired" }, status); // Pass the selected status to the view
+  ViewBag.AvailableOptions = status; //Ensures the dropdown retains the selected value after form submission
 ViewBag.StartTime = startTime?.ToString("yyyy-MM-dd");
 ViewBag.EndDateTime = endDateTime?.ToString("yyyy-MM-dd");
              return View(await search.ToListAsync());
@@ -58,8 +64,9 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
             return RedirectToAction("Index", "Accounts");
             }
 
-              var contracts = _context.Contracts.Where(c => c.ClientId == accountId)
+              var contracts = _context.Contracts.Where(c => c.ClientId == client.Id)
                 .ToList();
+
                  return View(contracts);
             }
              
