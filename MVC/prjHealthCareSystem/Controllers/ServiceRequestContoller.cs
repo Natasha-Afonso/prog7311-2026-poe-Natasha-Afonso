@@ -31,6 +31,7 @@ namespace prjHealthCareSystem.Controllers
                  //IIE Emeris School of Computer Science,2025
 
  string role = HttpContext.Session.GetString("AccountRole");
+ ViewBag.AccountRole = role; // Pass the role to the view
         if (role == "Admin")
             {
                 

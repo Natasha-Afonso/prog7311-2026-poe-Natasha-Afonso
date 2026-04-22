@@ -56,7 +56,7 @@ namespace prjHealthCareSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("ServiceRequests"); // show the updated list
+            return RedirectToAction(nameof(Index)); // show the updated list
         }
 
         [HttpPost]
@@ -72,7 +72,7 @@ namespace prjHealthCareSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("ServiceRequests"); // show the updated list
+            return RedirectToAction(nameof(Index)); // show the updated list
         }
 
 

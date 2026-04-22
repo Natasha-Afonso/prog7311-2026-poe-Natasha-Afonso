@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Service Requests List";
-    ViewBag.UserRole = Context.Session.GetString("UserRole");
+    ViewBag.UserRole = Context.Session.GetString("AccountRole");
 }
 
 
@@ -185,20 +185,20 @@
                 }
                 <span class="badge @statusClass">@item.Status</span>
             </td>
-             @if (ViewBag.UserRole == "Admin") {
+             @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending") {
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 
       <div class="flex space-x-2">
-          <form asp-controller="Admin" asp-action="Update" asp-route-id="@item.Id" method="post">
+          <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post">
               <button type="submit" class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded-md transition-colors">Approve</button>
           </form>
           <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post">
               <button type="submit" class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded-md transition-colors">Deny</button>
           </form>
-      </div
+      </div>
   </td>
     }
-  @if (ViewBag.UserRole == "Client") {
+  @if (ViewBag.AccountRole == "Client") {
             <td class="text-center">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
