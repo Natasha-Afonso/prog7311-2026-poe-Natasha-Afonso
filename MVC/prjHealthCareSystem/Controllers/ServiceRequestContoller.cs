@@ -15,17 +15,12 @@ namespace prjHealthCareSystem.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
 
-private readonly Dictionary<string, ICurrencyStrategy> _currencyStrategies;
+
        private readonly ApplicationDbContext _context;
 
         public ServiceRequestController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
-            _currencyStrategies = new Dictionary<string, ICurrencyStrategy>
-            {
-                { "USD", new USDStrategy(httpClientFactory, configuration) },
-                { "CNY", new CNYStrategy(httpClientFactory, configuration) },
-                { "JPY", new JPYStrategy(httpClientFactory, configuration) }
-            };
+           
             _context = context;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
@@ -61,7 +56,7 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
             }
 
               var requests = _context.ServiceRequests.Include(s => s.Contract)
-              .Where(p => p.Contract.ClientId == accountId)
+              .Where(p => p.Contract.ClientId == client.Id)
                 .ToList();
                  return View(requests);
             }
@@ -84,24 +79,27 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
         {
            
 
-            var policy = await _context.Contracts.FindAsync((serviceRequest.ContractId));
+            var contract = await _context.Contracts.FindAsync((serviceRequest.ContractId));
            
-            if(policy == null || policy.Status != "Active")
+            if(contract == null || contract.Status != "Active")
             {
                 var errorMessage = "The selected contract is not active. Please select an active contract.";
                 ModelState.AddModelError("ContractId", errorMessage);
             }
-
-            if(!_currencyStrategies.ContainsKey(serviceRequest.CurrencyFrom))
+           decimal exchangeRate = 0;
+            try
             {
-                var errorMessage = "The selected currency is not supported. Please select a supported currency.";
-                ModelState.AddModelError("Currency", errorMessage);
+                var strategy = CurrencyFactory.Create(serviceRequest.CurrencyFrom, _httpClientFactory, _configuration);
+                exchangeRate = await strategy.GetRateAsync();
+                
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("CurrencyFrom", ex.Message);
             }
             if(ModelState.IsValid)
             {
-                var strategy = _currencyStrategies[serviceRequest.CurrencyFrom];
-
-                decimal exchangeRate = await strategy.GetRateAsync();
+                
                 serviceRequest.Cost= serviceRequest.Amount * exchangeRate;
                 _context.Add(serviceRequest);
                 await _context.SaveChangesAsync();
