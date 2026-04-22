@@ -25,6 +25,8 @@ CREATE TABLE ServiceRequests (
     Id INT PRIMARY KEY IDENTITY(1,1),
     ContractId INT NOT NULL,
     Description NVARCHAR(MAX),
+    CurrencyFrom NVARCHAR(3) NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
     Cost DECIMAL(18, 2) NOT NULL,
     Status NVARCHAR(50),
     CONSTRAINT FK_ServiceRequests_Contracts FOREIGN KEY (ContractId) 
@@ -50,12 +52,12 @@ VALUES
 
 -- Insert Dummy ServiceRequest
 -- (Linking to the Contract IDs created above)
-INSERT INTO ServiceRequests (ContractId, Description, Cost, Status)
+INSERT INTO ServiceRequests (ContractId, Description, CurrencyFrom, Amount, Cost, Status)
 VALUES 
-(1, 'Annual Physical Examination', 1200.00, 'Completed'),
-(1, 'Blood Work - Routine Check', 450.50, 'Pending'),
-(3, 'Dental Wisdom Tooth Extraction', 3500.00, 'Confirmed'),
-(4, 'Optometry Consultation', 850.00, 'Cancelled');
+(1, 'Annual Physical Examination','USD', 1200.00, 1200.00, 'Completed'),
+(1, 'Blood Work - Routine Check', 'JPY', 450.50, 450.50, 'Pending'),
+(3, 'Dental Wisdom Tooth Extraction', 'USD', 3500.00, 3500.00, 'Confirmed'),
+(4, 'Optometry Consultation', 'USD', 850.00, 850.00, 'Cancelled');
 
 
 DROP TABLE ServiceRequests;
