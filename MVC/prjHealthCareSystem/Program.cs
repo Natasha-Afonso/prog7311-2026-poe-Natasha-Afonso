@@ -21,7 +21,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
         ));
 
-
+  //1. Add session services to the dependency injection containor
+  builder.Services.AddSession(options =>
+  {
+      options.IdleTimeout = TimeSpan.FromMinutes(20); //The session will expire
+                                                      //after 20 minutes of inactivity
+      options.Cookie.HttpOnly = true;//Makes the cookie inaccessible to client-side script
+      options.Cookie.IsEssential = true;//Required for GDPR compliance
+  });
 var app = builder.Build();
 
 
@@ -55,7 +62,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+ // 2.IMPORTANT: Add the sesssion middleware BEFORE UseAuthorized and MapControllerRoute
+ app.UseSession();
 //PDF file access
 app.UseStaticFiles();       
 

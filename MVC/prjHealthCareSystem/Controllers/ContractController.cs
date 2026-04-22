@@ -20,11 +20,14 @@ namespace prjHealthCareSystem.Controllers
 
         public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status, string signedConsentPath)
         {
-
-            
-            var search = _context.Contracts //DbSet<Contract>
+        string role = HttpContext.Session.GetString("AccountRole");
+        if (role == "Admin")
+            {
+                
+         var search = _context.Contracts //DbSet<Contract>
             .Include(c => c.Client).AsQueryable();
 
+         
           //Search date
           if (startTime.HasValue && endDateTime.HasValue)
             {
@@ -38,17 +41,29 @@ namespace prjHealthCareSystem.Controllers
                 search= search.Where(p => p.Status == status);
 
             }
-
-//search pdfs
- if(!string.IsNullOrEmpty(signedConsentPath))
-            
-            {
-                search= search.Where(p => p.SignedConsentPath == signedConsentPath);
+ViewBag.StartTime = startTime?.ToString("yyyy-MM-dd");
+ViewBag.EndDateTime = endDateTime?.ToString("yyyy-MM-dd");
+             return View(await search.ToListAsync());
 
             }
 
+            else if (role == "Client")
+            {
+                int? accountId = HttpContext.Session.GetInt32("AccountID");
 
-            return View(await search.ToListAsync());
+var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
+
+            if (client == null)
+            {
+            return RedirectToAction("Index", "Accounts");
+            }
+
+              var contracts = _context.Contracts.Where(c => c.ClientId == accountId)
+                .ToList();
+                 return View(contracts);
+            }
+             
+            return RedirectToAction("Index", "Accounts");
         
     }
 

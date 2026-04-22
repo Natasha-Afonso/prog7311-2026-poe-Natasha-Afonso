@@ -35,7 +35,39 @@ private readonly Dictionary<string, ICurrencyStrategy> _currencyStrategies;
             var serviceRequests = _context.ServiceRequests.Include(s => s.Contract).ThenInclude(c => c.Client);
                  //IIE Emeris School of Computer Science,2025
 
-            return View(await serviceRequests.ToListAsync());
+ string role = HttpContext.Session.GetString("AccountRole");
+        if (role == "Admin")
+            {
+                
+         var requests = _context.ServiceRequests //DbSet<Contract>
+            .Include(c => c.Contract)
+            .ThenInclude(c => c.Client)
+            .AsQueryable();
+
+
+             return View(await requests.ToListAsync());
+
+            }
+
+            else if (role == "Client")
+            {
+                int? accountId = HttpContext.Session.GetInt32("AccountID");
+
+var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
+
+            if (client == null)
+            {
+            return RedirectToAction("Index", "Accounts");
+            }
+
+              var requests = _context.ServiceRequests.Include(s => s.Contract)
+              .Where(p => p.Contract.ClientId == accountId)
+                .ToList();
+                 return View(requests);
+            }
+             
+            return RedirectToAction("Index", "Accounts");
+        
 
         }
     
@@ -82,6 +114,7 @@ private readonly Dictionary<string, ICurrencyStrategy> _currencyStrategies;
 [HttpPost]
         public async Task<IActionResult> Edit(int id, ServiceRequest serviceRequest)
         {
+    
             if(ModelState.IsValid)
             {
                 _context.Update(serviceRequest);

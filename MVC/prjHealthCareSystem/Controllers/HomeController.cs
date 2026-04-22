@@ -8,6 +8,16 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+         //--SESSION CHECK--
+ // Retrieve the Username from the session
+ string username = HttpContext.Session.GetString("AccountEmail");
+
+
+ //If the username is null or empty, it means the user is not logged
+ if (string.IsNullOrEmpty(username))
+ {
+     return RedirectToAction("Index", "Accounts");
+ }
         return View();
     }
 

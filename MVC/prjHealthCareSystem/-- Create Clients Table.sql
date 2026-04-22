@@ -3,8 +3,21 @@ CREATE TABLE Clients (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
     ContactDetails NVARCHAR(255),
-    Region NVARCHAR(100)
+    AccountID INT NOT NULL,
+    Region NVARCHAR(100),
+    CONSTRAINT FK_Clients_Accounts FOREIGN KEY (AccountID) 
+    REFERENCES Accounts(Id) ON DELETE CASCADE
 );
+
+ -- Create Account Table
+CREATE TABLE Accounts (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Email NVARCHAR(255) NOT NULL,
+    Password NVARCHAR(255) NOT NULL,
+    Role NVARCHAR(50) NOT NULL,
+ 
+);
+
 
 -- Create Contract Table
 CREATE TABLE Contracts (
@@ -35,18 +48,27 @@ CREATE TABLE ServiceRequests (
 
 
 -- Insert Dummy Clients
-INSERT INTO Clients (Name, ContactDetails, Region)
+    INSERT INTO Clients (Name, ContactDetails,AccountID , Region)
+    VALUES 
+('John Smith', 'john.smith@email.com', 1, 'Gauteng'),
+('Sarah Connor', '555-0199', 2, 'Western Cape'),
+('Thabo Mokoena', 'thabo.m@provider.co.za', 3, 'KwaZulu-Natal');
+
+
+-- Insert Dummy Accounts
+INSERT INTO Accounts (Email, Password, Role)
 VALUES 
-('John Smith', 'john.smith@email.com', 'Gauteng'),
-('Sarah Connor', '555-0199', 'Western Cape'),
-('Thabo Mokoena', 'thabo.m@provider.co.za', 'KwaZulu-Natal');
+('john.smith@email.com', 'Password@124', 'Client'),
+('sarah.connor@email.com', 'Password@124', 'Admin'),
+('thabo.mokoena@email.com', 'Password@124', 'Client');
+
+
 
 -- Insert Dummy Contracts
 -- (Assuming IDs 1, 2, and 3 were generated for the patients above)
 INSERT INTO Contracts ( ClientId, ContractName, StartDate, EndDate, Status, ServiceLevel)
 VALUES 
 ( 1, 'Contract', '2025-01-01', '2026-01-01', 'Active', 'Gold'),
-( 1, 'ContractTwo', '2024-06-01', '2025-06-01', 'Draft', 'Silver'),
 (2, 'ContractThree', '2025-03-15', '2026-03-15', 'Active', 'Platinum'),
 ( 3, 'ContractFour', '2025-01-01', '2025-12-31', 'Active', 'Bronze');
 

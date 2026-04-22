@@ -2,7 +2,147 @@
 
 @{
     ViewData["Title"] = "Service Requests List";
+    ViewBag.UserRole = Context.Session.GetString("UserRole");
 }
+
+
+
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Part2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E0F2F1;
+        }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: #4A5568;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .sidebar-item:hover,
+            .sidebar-item.active {
+                background-color: #2DD4BF;
+                color: white;
+            }
+
+            .sidebar-item .material-icons {
+                margin-right: 1rem;
+            }
+
+
+
+
+
+
+        .kanban-column {
+            min-height: 300px;
+        }
+
+        .task-card {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+            .task-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .task-card:active {
+                cursor: grabbing;
+            }
+
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .cpu-mode-indicator {
+            transition: all 0.3s ease;
+        }
+
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(156, 163, 175, 0.8);
+            }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+        }
+
+            .dark ::-webkit-scrollbar-thumb:hover {
+                background: rgba(75, 85, 99, 0.8);
+            }
+
+        /* Progress bars */
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        /* Gantt chart */
+        .gantt-container {
+            overflow-x: auto;
+        }
+
+        .gantt-row {
+            height: 40px;
+        }
+
+        .gantt-bar {
+            height: 22px;
+            margin-top: 9px;
+            border-radius: 3px;
+            position: relative;
+        }
+    </style>
+</head>
+
 
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
     <h1>Service Requests</h1>
@@ -37,20 +177,36 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-              R @item.Cost.ToString("C")
+                @item.Cost.ToString("C")
             </td>
             <td>
                 @{
-                    var statusClass = item.Status == "Scheduled" ? "bg-primary" : "bg-success";
+                    var statusClass = item.Status == "Pending" ? "bg-primary" : "bg-success";
                 }
                 <span class="badge @statusClass">@item.Status</span>
             </td>
+             @if (ViewBag.UserRole == "Admin") {
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                
+      <div class="flex space-x-2">
+          <form asp-controller="Admin" asp-action="Update" asp-route-id="@item.Id" method="post">
+              <button type="submit" class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded-md transition-colors">Approve</button>
+          </form>
+          <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post">
+              <button type="submit" class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded-md transition-colors">Deny</button>
+          </form>
+      </div
+  </td>
+    }
+  @if (ViewBag.UserRole == "Client") {
             <td class="text-center">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
             </td>
+            }
         </tr>
 }
     </tbody>
 </table>
+
