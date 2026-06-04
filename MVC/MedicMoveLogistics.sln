@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "prjHealthCareSystem", "prjHealthCareSystem\prjHealthCareSystem.csproj", "{675AAEF0-AC13-4639-AF9A-77087BB9A7F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicMoveLogisticsMVC", "MedicMoveLogisticsMVC\MedicMoveLogisticsMVC.csproj", "{675AAEF0-AC13-4639-AF9A-77087BB9A7F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "prjHealthCareSystem.Tests", "prjHealthCareSystem.Tests\prjHealthCareSystem.Tests.csproj", "{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicMoveLogistics.Tests", "MedicMoveLogistics.Tests\MedicMoveLogistics.Tests.csproj", "{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

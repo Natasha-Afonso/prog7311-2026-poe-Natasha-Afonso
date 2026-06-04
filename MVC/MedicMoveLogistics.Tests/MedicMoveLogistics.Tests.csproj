@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\prjHealthCareSystem\prjHealthCareSystem.csproj" />
+    <ProjectReference Include="..\MedicMoveLogisticsMVC\MedicMoveLogisticsMVC.csproj" />
   </ItemGroup>
 
 </Project>
