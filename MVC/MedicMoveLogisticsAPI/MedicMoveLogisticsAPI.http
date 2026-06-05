@@ -1,0 +1,6 @@
+@MedicMoveLogisticsAPI_HostAddress = http://localhost:5293
+
+GET {{MedicMoveLogisticsAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
