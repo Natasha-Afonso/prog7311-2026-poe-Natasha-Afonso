@@ -20,14 +20,14 @@ namespace MedicMoveLogisticsAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Contract>>> GetAll()
         {
-            return await _context.Contracts.Include(c => c.Client).ToListAsync();
+            return await _context.Contract.Include(c => c.Client).ToListAsync();
         }
 
         // GET: api/Contract/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Contract>> GetById(int id)
         {
-            var contract = await _context.Contracts.Include(c => c.Client).FirstOrDefaultAsync(c => c.Id == id);
+            var contract = await _context.Contract.Include(c => c.Client).FirstOrDefaultAsync(c => c.Id == id);
 
             if (contract == null)
             
@@ -41,7 +41,7 @@ namespace MedicMoveLogisticsAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Contract>> Create(Contract contract)
         {
-            _context.Contracts.Add(contract);
+            _context.Contract.Add(contract);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = contract.Id }, contract);
@@ -63,7 +63,7 @@ namespace MedicMoveLogisticsAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Contracts.Any(e => e.Id == id))
+                if (!_context.Contract.Any(e => e.Id == id))
                 
                     return NotFound();
                 
@@ -80,12 +80,12 @@ namespace MedicMoveLogisticsAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _context.Contract.FindAsync(id);
             if (contract == null)
                 return NotFound();
             
 
-            _context.Contracts.Remove(contract);
+            _context.Contract.Remove(contract);
             await _context.SaveChangesAsync();
 
             return NoContent();

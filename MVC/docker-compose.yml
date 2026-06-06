@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  medic-db-service:
+    build:
+      context: .
+      dockerfile: ./MedicDB/Dockerfile
+    container_name: medic-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Password@1!"
+      MSSQL_PID: "Express"
+    ports:
+      - "1401:1433" # Secondary port to avoid local SQL conflicts
+    volumes:
+      - db_data:/var/opt/mssql
+      - ./logs:/var/opt/mssql/logs
+    restart: unless-stopped
+    networks:
+      - medic-network 
+  mvc-service:
+    build:
+      context: .                # Root context to ensure  file accessibility
+      dockerfile: ./MedicMoveLogisticsMVC/Dockerfile # Path to MVC Dockerfile
+    container_name: mvc-medic-service-magic
+    environment:
+      SQL_CONNECTION_STRING: "Server=medic-db-service; Database=Medic;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;user id=sa;password=Password@1!"
+    ports:
+      - "80:8080"
+    networks:
+      - medic-network
+
+  api-service:
+    build:
+      context: .
+      dockerfile: ./MedicMoveLogisticsAPI/Dockerfile
+    container_name: api-medic-service
+    environment:
+      SQL_CONNECTION_STRING: "Server=medic-db; Database=Medic;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;user id=sa;password=Password@1!"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - medic-db-service
+    networks:
+      - medic-network
+   
+networks:
+  medic-network:
+    driver: bridge
+
+volumes:
+  db_data:

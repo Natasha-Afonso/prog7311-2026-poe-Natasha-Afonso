@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace MedicMoveLogisticsAPI.Models{
-
+    
 public class Contract
 {
     public int Id { get; set; }

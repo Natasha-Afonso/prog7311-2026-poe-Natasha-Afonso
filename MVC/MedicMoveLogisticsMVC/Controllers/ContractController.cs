@@ -11,45 +11,47 @@ namespace prjHealthCareSystem.Controllers
     public class ContractController : Controller
     {
         //Adding the data class
+        private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _context;
 
-        public ContractController(ApplicationDbContext context)
+        public ContractController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
+            _httpClient = httpClientFactory.CreateClient();
         }
 
         public async Task<IActionResult> Index(DateTime? startTime, DateTime? endDateTime, string status, string signedConsentPath)
         {
-        string role = HttpContext.Session.GetString("AccountRole");
-        ViewBag.AccountRole = role; // Pass the role to the view
-        if (role == "Admin")
+            string role = HttpContext.Session.GetString("AccountRole");
+            ViewBag.AccountRole = role; // Pass the role to the view
+            if (role == "Admin")
             {
-                
-         var search = _context.Contracts //DbSet<Contract>
-            .Include(c => c.Client).AsQueryable();
+               
+                var contracts = await _httpClient.GetFromJsonAsync<List<Contract>>("http://api-service:8080/api/Contract");
+                var search = contracts.AsQueryable();
 
-         
-          //Search date
-          if (startTime.HasValue && endDateTime.HasValue)
-            {
-                search = search.Where(p => 
-                p.StartDate >= startTime && p.EndDate <= endDateTime); //IQueryable<Contract>
-            }
 
-   
-            //Search Status
-            if(!string.IsNullOrEmpty(status))
-            {
-                search= search.Where(p => p.Status == status);
+                //Search date
+                if (startTime.HasValue && endDateTime.HasValue)
+                {
+                    search = search.Where(p =>
+                    p.StartDate >= startTime && p.EndDate <= endDateTime); //IQueryable<Contract>
+                }
 
-            }
 
-            ViewBag.StatusFilter = new SelectList(new[] 
-  { "Draft", "Active", "Expired" }, status); // Pass the selected status to the view
-  ViewBag.AvailableOptions = status; //Ensures the dropdown retains the selected value after form submission
-ViewBag.StartTime = startTime?.ToString("yyyy-MM-dd");
-ViewBag.EndDateTime = endDateTime?.ToString("yyyy-MM-dd");
-             return View(await search.ToListAsync());
+                //Search Status
+                if (!string.IsNullOrEmpty(status))
+                {
+                    search = search.Where(p => p.Status == status);
+
+                }
+
+                ViewBag.StatusFilter = new SelectList(new[]
+      { "Draft", "Active", "Expired" }, status); // Pass the selected status to the view
+                ViewBag.AvailableOptions = status; //Ensures the dropdown retains the selected value after form submission
+                ViewBag.StartTime = startTime?.ToString("yyyy-MM-dd");
+                ViewBag.EndDateTime = endDateTime?.ToString("yyyy-MM-dd");
+                return View(await search.ToListAsync());
 
             }
 
@@ -57,76 +59,76 @@ ViewBag.EndDateTime = endDateTime?.ToString("yyyy-MM-dd");
             {
                 int? accountId = HttpContext.Session.GetInt32("AccountID");
 
-var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
+                var client = _context.Clients.FirstOrDefault(c => c.AccountId == accountId);
 
-            if (client == null)
-            {
-            return RedirectToAction("Index", "Accounts");
+                if (client == null)
+                {
+                    return RedirectToAction("Index", "Accounts");
+                }
+
+                var contracts = _context.Contracts.Where(c => c.ClientId == client.Id)
+                  .ToList();
+
+                return View(contracts);
             }
 
-              var contracts = _context.Contracts.Where(c => c.ClientId == client.Id)
-                .ToList();
-
-                 return View(contracts);
-            }
-             
             return RedirectToAction("Index", "Accounts");
-        
-    }
+
+        }
 
 
 
         public IActionResult Create()
         {
-                 ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name");
+            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name");
             return View();
         }
 
 
-    [HttpPost]
-            public async Task<IActionResult> Create(Contract contract, IFormFile? upload)
+        [HttpPost]
+        public async Task<IActionResult> Create(Contract contract, IFormFile? upload)
+        {
+            if (ModelState.IsValid)
             {
-                if(ModelState.IsValid)
+                if (upload != null && upload.Length > 0)
                 {
-                    if(upload != null && upload.Length > 0)
+                    var uploadsfolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                    if (!Directory.Exists(uploadsfolder))
                     {
-                       var uploadsfolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                        if(!Directory.Exists(uploadsfolder))
-                        {
-                            Directory.CreateDirectory(uploadsfolder);
-                        }
+                        Directory.CreateDirectory(uploadsfolder);
+                    }
 
-                        //Create a file name so that there is no overwrite
-                        var fileName = Guid.NewGuid().ToString() + "_"+(upload.FileName);
-                        var filePath = Path.Combine(uploadsfolder, fileName);
+                    //Create a file name so that there is no overwrite
+                    var fileName = Guid.NewGuid().ToString() + "_" + (upload.FileName);
+                    var filePath = Path.Combine(uploadsfolder, fileName);
 
-                       
-                        //Open a pipeline to read the file to the hard drive
-                       var stream = new FileStream(filePath, FileMode.Create);
-                        using(stream)
+
+                    //Open a pipeline to read the file to the hard drive
+                    var stream = new FileStream(filePath, FileMode.Create);
+                    using (stream)
                     {
                         await upload.CopyToAsync(stream);
                     }
                     //Save the text path to the database so we can find the file later alligator
                     contract.SignedConsentPath = "/uploads/" + fileName;
-            }
-            //Add the new policy to the database
-            _context.Add(contract);
-            await _context.SaveChangesAsync();
+                }
+                //Add the new policy to the database
+                var reponse = await _httpClient.PostAsJsonAsync("http://api-service:8080/api/Contract", contract);
+                if (reponse.IsSuccessStatusCode)
+                {
 
-            return RedirectToAction(nameof(Index));
-                
-            
+                return RedirectToAction(nameof(Index));
+
+
             }
- //Repopulate the patient dropdown so t doesn't break when we reload the page
-    ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name", contract.ClientId);
-             
-        //Send back to the form
+            }
+            //Repopulate the patient dropdown so t doesn't break when we reload the page
+            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name", contract.ClientId);
+
+            //Send back to the form
             return View(contract);
+        }
 
-
-            }
-            
         //Edit
         public async Task<IActionResult> Edit(int id, Contract contract)
         {
@@ -153,10 +155,10 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
         }
 
         [HttpPost, ActionName("Delete")]
-     public async Task<IActionResult> DeleteConfirm(int id)
+        public async Task<IActionResult> DeleteConfirm(int id)
         {
-            var contract =await _context.Contracts.FindAsync(id);
-            if(contract != null)
+            var contract = await _context.Contracts.FindAsync(id);
+            if (contract != null)
             {
                 _context.Contracts.Remove(contract);
             }

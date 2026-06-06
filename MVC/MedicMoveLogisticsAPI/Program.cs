@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MedicMoveLogisticsAPI.Data;
+using System.Text.Json.Serialization;
 namespace MedicMoveLogisticsAPI
 {
     public class Program
@@ -14,7 +15,12 @@ namespace MedicMoveLogisticsAPI
                options.UseSqlServer(Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")));
 
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+    {
+        // This tells the serializer to ignore loops instead of crashing
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
             builder.Services.AddOpenApi(); // Keeps the native engine
             var app = builder.Build();
             if (true)
