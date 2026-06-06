@@ -24,6 +24,7 @@ services:
       dockerfile: ./MedicMoveLogisticsMVC/Dockerfile # Path to MVC Dockerfile
     container_name: mvc-medic-service-magic
     environment:
+      ASPNETCORE_ENVIRONMENT: Development # <--- ADD THIS LINE HERE
       SQL_CONNECTION_STRING: "Server=medic-db-service; Database=Medic;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;user id=sa;password=Password@1!"
     ports:
       - "80:8080"

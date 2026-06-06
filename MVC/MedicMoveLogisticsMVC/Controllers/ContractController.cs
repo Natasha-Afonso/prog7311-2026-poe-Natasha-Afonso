@@ -59,14 +59,14 @@ namespace prjHealthCareSystem.Controllers
             {
                 int? accountId = HttpContext.Session.GetInt32("AccountID");
 
-                var client = _context.Clients.FirstOrDefault(c => c.AccountId == accountId);
+                var client = _context.Client.FirstOrDefault(c => c.AccountId == accountId);
 
                 if (client == null)
                 {
                     return RedirectToAction("Index", "Accounts");
                 }
 
-                var contracts = _context.Contracts.Where(c => c.ClientId == client.Id)
+                var contracts = _context.Contract.Where(c => c.ClientId == client.Id)
                   .ToList();
 
                 return View(contracts);
@@ -80,7 +80,7 @@ namespace prjHealthCareSystem.Controllers
 
         public IActionResult Create()
         {
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name");
+            ViewData["ClientId"] = new SelectList(_context.Client, "Id", "Name");
             return View();
         }
 
@@ -123,7 +123,7 @@ namespace prjHealthCareSystem.Controllers
             }
             }
             //Repopulate the patient dropdown so t doesn't break when we reload the page
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name", contract.ClientId);
+            ViewData["ClientId"] = new SelectList(_context.Client, "Id", "Name", contract.ClientId);
 
             //Send back to the form
             return View(contract);
@@ -140,7 +140,7 @@ namespace prjHealthCareSystem.Controllers
             }
 
 
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "Name",
+            ViewData["ClientId"] = new SelectList(_context.Client, "Id", "Name",
              contract.ClientId);
             return View(contract);
         }
@@ -148,7 +148,7 @@ namespace prjHealthCareSystem.Controllers
         //Delete
         public async Task<IActionResult> Delete(int? id)
         {
-            var deleteContract = await _context.Contracts.//DbSet<InsurancePolicy>
+            var deleteContract = await _context.Contract.//DbSet<InsurancePolicy>
             Include(p => p.Client)//Task<InsurancePolicy>
             .FirstOrDefaultAsync(m => m.Id == id);
             return View(deleteContract);
@@ -157,10 +157,10 @@ namespace prjHealthCareSystem.Controllers
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _context.Contract.FindAsync(id);
             if (contract != null)
             {
-                _context.Contracts.Remove(contract);
+                _context.Contract.Remove(contract);
             }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

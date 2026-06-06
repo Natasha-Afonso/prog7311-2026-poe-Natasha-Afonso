@@ -18,7 +18,7 @@ namespace prjHealthCareSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Clients.ToListAsync());
+            return View(await _context.Client.ToListAsync());
             //Returns the whole list stored in the db
         }
 
@@ -46,7 +46,7 @@ namespace prjHealthCareSystem.Controllers
                 return NotFound();
             }
 
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Client.FindAsync(id);
             if (client == null)
             {
                 return NotFound();
@@ -79,7 +79,7 @@ namespace prjHealthCareSystem.Controllers
             }
 
             //Find the client by their id
-            var client = await _context.Clients.FirstOrDefaultAsync(m => m.Id == id); //LingQ
+            var client = await _context.Client.FirstOrDefaultAsync(m => m.Id == id); //LingQ
             if (client == null)
             {
                 return NotFound();
@@ -96,7 +96,7 @@ namespace prjHealthCareSystem.Controllers
                 return NotFound();
             }
 
-            var client = await _context.Clients.FirstOrDefaultAsync(m => m.Id == id);
+            var client = await _context.Client.FirstOrDefaultAsync(m => m.Id == id);
             if(client == null)
             {
                 return NotFound();
@@ -108,10 +108,10 @@ namespace prjHealthCareSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Client.FindAsync(id);
             if(client != null)
             {
-                _context.Clients.Remove(client);
+                _context.Client.Remove(client);
             }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

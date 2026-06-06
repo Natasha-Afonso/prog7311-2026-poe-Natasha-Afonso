@@ -49,7 +49,7 @@ namespace prjHealthCareSystem.Controllers
             {
                 int? accountId = HttpContext.Session.GetInt32("AccountID");
 
-var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
+var client =_context.Client.FirstOrDefault(c => c.AccountId == accountId);
 
             if (client == null)
             {
@@ -71,7 +71,7 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
         //create
         public IActionResult Create()
         {
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName");
+            ViewData["ContractId"] = new SelectList(_context.Contract, "Id", "ContractName");
             return View();
         }
 
@@ -80,7 +80,7 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
         {
            
 
-            var contract = await _context.Contracts.FindAsync((serviceRequest.ContractId));
+            var contract = await _context.Contract.FindAsync((serviceRequest.ContractId));
            
             if(contract == null || contract.Status != "Active")
             {
@@ -106,7 +106,7 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName", serviceRequest.ContractId);
+            ViewData["ContractId"] = new SelectList(_context.Contract, "Id", "ContractName", serviceRequest.ContractId);
            
      return View(serviceRequest);
         }
@@ -120,7 +120,7 @@ var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName", serviceRequest.ContractId);
+            ViewData["ContractId"] = new SelectList(_context.Contract, "Id", "ContractName", serviceRequest.ContractId);
             return View(serviceRequest);
         }
 
