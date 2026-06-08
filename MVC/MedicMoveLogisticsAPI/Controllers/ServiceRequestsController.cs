@@ -3,6 +3,7 @@ using MedicMoveLogisticsAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+//Emeris School of Computer Science, 2025
 namespace MedicMoveLogisticsAPI.Controllers
 {
     [Route("api/[controller]")]
