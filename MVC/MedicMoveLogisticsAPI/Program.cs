@@ -11,7 +11,7 @@ namespace MedicMoveLogisticsAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+//Chandra, S 2026.
             // Add services to the container.
  // Add services to the container.
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -61,3 +61,6 @@ namespace MedicMoveLogisticsAPI
         }
     }
 }
+/*
+Chandra, S. 2026. JWT Authentication in ASP.NET Core: A complete step-bystey guide. (Version 10.0) [Source Code]. Available at: <https://medium.com/@Rajdip27/jwt-authentication-in-asp-net-core-a-complete-step-by-step-guide-94c955d907da> [Accessed 7 June 2026]
+*/
