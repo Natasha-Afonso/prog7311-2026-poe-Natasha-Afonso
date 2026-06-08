@@ -1,80 +1,82 @@
 using Microsoft.EntityFrameworkCore;
-using prjHealthCareSystem.Data;
+using MedicMoveLogisticsMVC .Data;
+using MedicMoveLogisticsMVC.Services;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-//---------------------------------------
-
-
-//Add services to the container.
-    builder.Services.AddControllersWithViews();
-    
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-        ));
-
-  //1. Add session services to the dependency injection containor
-  builder.Services.AddSession(options =>
-  {
-      options.IdleTimeout = TimeSpan.FromMinutes(20); //The session will expire
-                                                      //after 20 minutes of inactivity
-      options.Cookie.HttpOnly = true;//Makes the cookie inaccessible to client-side script
-      options.Cookie.IsEssential = true;//Required for GDPR compliance
-  });
-var app = builder.Build();
-
-
-using (var scope = app.Services.CreateScope())
+namespace MedicMoveLogisticsMVC
 {
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    try
+    public class Program
     {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        //Give SQL server 45 seconds to warm up in Doncker
-      
-        logger.LogInformation("Waiting 10 seconds for Server to boot...");
-    
-    context.Database.EnsureCreated();
-    logger.LogInformation("Database and tables created successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while migrating the database.");
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            // MVC
+            builder.Services.AddControllersWithViews();
+            
+            builder.Services.AddHttpClient<ClientService>();
+            builder.Services.AddHttpClient<ContractService>();
+            builder.Services.AddHttpClient<AuthService>();
+            builder.Services.AddHttpClient<ServiceRequestsService>();
+
+            // API Calls
+            builder.Services.AddHttpClient();
+
+            // Database
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")
+                    ?? builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Session
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(20);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            var app = builder.Build();
+
+            // Create database if it doesn't exist
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+
+                    context.Database.EnsureCreated();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Database creation failed.");
+                }
+            }
+
+            // Configure pipeline
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseSession();
+
+            app.UseAuthorization();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.Run();
+        }
     }
 }
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseRouting();
- // 2.IMPORTANT: Add the sesssion middleware BEFORE UseAuthorized and MapControllerRoute
- app.UseSession();
-//PDF file access
-app.UseStaticFiles();       
-
-app.UseAuthorization();
-
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
-
-app.Run();

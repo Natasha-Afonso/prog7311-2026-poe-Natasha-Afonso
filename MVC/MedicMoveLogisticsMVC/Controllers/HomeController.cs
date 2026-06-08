@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using prjHealthCareSystem.Models;
+using MedicMoveLogisticsMVC.Models;
 
-namespace prjHealthCareSystem.Controllers;
+namespace MedicMoveLogisticsMVC.Controllers;
 public class HomeController : Controller
 {
 

@@ -1,27 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using prjHealthCareSystem.Data;
+using MedicMoveLogisticsMVC.Data;
+using MedicMoveLogisticsMVC.Services;
 
 
 
-namespace prjHealthCareSystem.Controllers
+namespace MedicMoveLogisticsMVC.Controllers
 {
-    public class Admin: Controller
+    public class AdminController : Controller
     {
-        private readonly ApplicationDbContext _context;
+
+        private readonly ServiceRequestsService _serviceRequestService;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         // used to access 
-        public Admin(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        public AdminController(ServiceRequestsService serviceRequestsService, IWebHostEnvironment webHostEnvironment)
         {
-            _context = context;
+            _serviceRequestService = serviceRequestsService;
+
             _webHostEnvironment = webHostEnvironment;
             //tells the system to look at the wwwroot
         }
 
 
 
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index()
         {
             //--SESSION CHECK--
             // Retrieve the role from the session
@@ -33,12 +36,11 @@ namespace prjHealthCareSystem.Controllers
             {
                 return RedirectToAction("Index", "Accounts");
             }
-           //show all requests to the admin
-             var requests = await _context.ServiceRequests
-               .Include(i => i.Contract)
-                  .ThenInclude(i => i.Client)
-               .ToListAsync();
-          
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            //show all requests to the admin
+            var requests = await _serviceRequestService.GetAllServiceRequestsAsync(token);
+
+
             return View(requests);
 
         }
@@ -46,35 +48,53 @@ namespace prjHealthCareSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateApprove(int? id)
         {
-            var request = await _context.ServiceRequests.FindAsync(id);
-            if (request == null)
+            if (id == null) return NotFound();
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            try
             {
-                return NotFound();
+                var request = await _serviceRequestService.GetServiceRequestsByIdAsync(id.Value, token);
+                if (request == null)
+                {
+                    return NotFound();
+                }
+
+                request.Status = "Approved";// Admin has approved the request
+
+                await _serviceRequestService.UpdateServiceRequestsAsync(id.Value, request, token);
+
+                return RedirectToAction(nameof(Index)); // show the updated list
             }
-
-            request.Status = "Approved";// Admin has approved the request
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index)); // show the updated list
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Failed to approve: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateDeny(int? id)
         {
-            var request = await _context.ServiceRequests.FindAsync(id);
-            if (request == null)
+                if (id == null) return NotFound();
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            try
             {
-                return NotFound();
+                var request = await _serviceRequestService.GetServiceRequestsByIdAsync(id.Value, token);
+                if (request == null)
+                {
+                    return NotFound();
+                }
+
+                request.Status = "Denied";// Admin has not approved the request
+
+                await _serviceRequestService.UpdateServiceRequestsAsync(id.Value, request, token);
+
+                return RedirectToAction(nameof(Index)); // show the updated list
             }
-
-            request.Status = "Denied";// Admin has denied the request
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index)); // show the updated list
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Failed to deny: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
         }
-
-
     }
 }

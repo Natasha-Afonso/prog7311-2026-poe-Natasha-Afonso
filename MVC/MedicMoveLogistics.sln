@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicMoveLogisticsMVC", "MedicMoveLogisticsMVC\MedicMoveLogisticsMVC.csproj", "{675AAEF0-AC13-4639-AF9A-77087BB9A7F8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicMoveLogistics.Tests", "MedicMoveLogistics.Tests\MedicMoveLogistics.Tests.csproj", "{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicMoveLogisticsAPI", "MedicMoveLogisticsAPI\MedicMoveLogisticsAPI.csproj", "{23661837-108E-4E2A-A25F-E9ED25D7C3E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,18 @@ Global
 		{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}.Release|x64.Build.0 = Release|Any CPU
 		{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}.Release|x86.ActiveCfg = Release|Any CPU
 		{B44488E2-98EE-4ED2-B0E1-8D12A9578B84}.Release|x86.Build.0 = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|x64.Build.0 = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Debug|x86.Build.0 = Debug|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|x64.ActiveCfg = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|x64.Build.0 = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|x86.ActiveCfg = Release|Any CPU
+		{23661837-108E-4E2A-A25F-E9ED25D7C3E6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

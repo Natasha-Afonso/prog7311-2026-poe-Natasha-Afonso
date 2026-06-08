@@ -1,20 +1,30 @@
-# Step 1: Use the .NET SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
+# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# Copy the project file and restore dependencies
-COPY ["MedicMoveLogisticsMVC.csproj", "./"]
-RUN dotnet restore "./MedicMoveLogisticsMVC.csproj"
-
-# Copy the rest of the code and build the release
-COPY . .
-RUN dotnet publish "MedicMoveLogisticsMVC.csproj" -c Release -o /app/publish /p:useAppHost=false
-
-# Step 2: Use the lighter ASP.NET runtime image to run the app
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+# This stage is used when running from VS in fast mode (Default for Debug configuration)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+USER root
 WORKDIR /app
-COPY --from=build /app/publish .
-
-# .NET 8 defaults to port 8080
 EXPOSE 8080
+EXPOSE 8081
+
+
+# This stage is used to build the service project
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["MedicMoveLogisticsMVC/MedicMoveLogisticsMVC.csproj", "MedicMoveLogisticsMVC/"]
+RUN dotnet restore "./MedicMoveLogisticsMVC/MedicMoveLogisticsMVC.csproj"
+COPY . .
+WORKDIR "/src/MedicMoveLogisticsMVC"
+RUN dotnet build "./MedicMoveLogisticsMVC.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# This stage is used to publish the service project to be copied to the final stage
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./MedicMoveLogisticsMVC.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MedicMoveLogisticsMVC.dll"]

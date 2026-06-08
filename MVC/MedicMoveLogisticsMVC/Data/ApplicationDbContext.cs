@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using prjHealthCareSystem.Models;
+using MedicMoveLogisticsMVC.Models;
 
-namespace prjHealthCareSystem.Data
+namespace MedicMoveLogisticsMVC.Data
 {
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
  public DbSet<Accounts> Accounts { get; set; }
-        public DbSet<Client> Clients { get; set; }
-        public DbSet<Contract> Contracts { get; set; }
-        public DbSet<ServiceRequest> ServiceRequests { get; set; }
+        public DbSet<Client> Client { get; set; }
+        public DbSet<Contract> Contract { get; set; }
+        public DbSet<ServiceRequests> ServiceRequests { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-namespace prjHealthCareSystem.Models;
+namespace MedicMoveLogisticsMVC.Models;
 
 public class ErrorViewModel
 {

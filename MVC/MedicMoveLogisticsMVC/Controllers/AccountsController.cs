@@ -1,96 +1,70 @@
 using Microsoft.AspNetCore.Mvc;
-using prjHealthCareSystem;
-using prjHealthCareSystem.Data;
+using Microsoft.AspNetCore.Http;
+using MedicMoveLogisticsMVC.Services;
+using MedicMoveLogisticsMVC.Models;
 
-namespace prjHealthCareSystem.Controllers
+namespace MedicMoveLogisticsMVC.Controllers
 {
     public class AccountsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AuthService _authService;
 
-        public AccountsController(ApplicationDbContext context)
+        public AccountsController(AuthService authService)
         {
-            _context = context;
+            _authService = authService;
         }
-
-
-public IActionResult Index()
+        [HttpGet]
+        [Route("Accounts")]
+        [Route("Accounts/Login")]
+        public IActionResult Login()
         {
-            return View("Index");
+            return View(new LoginView());
         }
-
-
-
-        //(Troelsen, A. and Japikse, P. 2021)
 
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public async Task<IActionResult> Login(LoginView login)
         {
-
-            var valid = _context.Accounts.FirstOrDefault(a => a.Email == email);
-
-            //check for email
-            if (valid == null)
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Invalid username or password";
-                return View("Index");
+                return View(login);
             }
-            if (valid.Password != password)
+
+            var authResult = await _authService.LoginAsync(login);
+
+            if (authResult == null)
             {
-                ViewBag.Error = "Invalid username or password";
-                return View("Index");
+                ModelState.AddModelError(string.Empty, "Invalid login attempt. Please check your email address or password.");
+                return View(login);
             }
 
 
-            //---SESSION CREATION
-            //If credentionals are valid, create a session variable
-            //to store the username
-            //This marks the user as "loggen in"
-            HttpContext.Session.SetString("AccountEmail", valid.Email);
-            HttpContext.Session.SetString("AccountRole", valid.Role);
-         
-            HttpContext.Session.SetInt32("AccountID", valid.ID);
+            HttpContext.Session.SetString("JWTToken", authResult.Token);
+            HttpContext.Session.SetString("AccountRole", authResult.Role);
+            HttpContext.Session.SetString("UserEmail", login.Email);
 
-            if (valid.Role == "Admin")
+if (authResult.ClientId.HasValue)
             {
-              
-                //Redirect HR
+                HttpContext.Session.SetInt32("AccountClientId",authResult.ClientId.Value);
+            }
+
+            if (authResult.Role == "Admin")
+            {
                 return RedirectToAction("Index", "Admin");
             }
-           
-            else
+            else if (authResult.Role == "Client")
             {
-                //Redirect Lecturers
                 return RedirectToAction("Index", "Client");
             }
-        
+            
+        ModelState.AddModelError(string.Empty,"Unauthorized role configuration");
+        return View(login);
         }
 
-
-
-
-
-
-        //GET: /Account/Logout
-        //This action logs the user out
-
+        [HttpGet]
         public IActionResult Logout()
         {
-            //-- SESSSION DESTRUCTION ---
-            // Clear the session to the user out
             HttpContext.Session.Clear();
-
-
-            TempData["SuccessMessage"] = $"You have been logged out!";
-            //Redirect the user back to the login  page
-            return RedirectToAction("Index");
+            return RedirectToAction("Login");
         }
-
-
-
-
-
     }
 }
-/*References
- * Troelsen, A. and Japikse, P. 2021.Pro C# 9 with .NET 5:Foundational Principles and Practices in Programming. 10th ed.Apress.*/

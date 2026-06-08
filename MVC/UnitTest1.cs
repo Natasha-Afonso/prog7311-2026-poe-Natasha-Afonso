@@ -1,6 +1,6 @@
 
 using System.Diagnostics.Contracts;
-using prog7311_2026_poe_Natasha_Afonso;
+
 namespace MVC;
 public class UnitTest1
 {
@@ -43,7 +43,7 @@ public class UnitTest1
     [Fact]
     public void CalculationOfCurrency() //testing if the calculation of the cost based on the exchange rate is correct
     {
-        var serviceRequest = new ServiceRequest
+        var serviceRequest = new ServiceRequests
         {
             Amount = 100,
             CurrencyFrom = "USD"

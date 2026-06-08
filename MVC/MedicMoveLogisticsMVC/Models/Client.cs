@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace prjHealthCareSystem.Models
+namespace MedicMoveLogisticsMVC.Models
 {
     public class Client
     {
@@ -11,8 +11,8 @@ namespace prjHealthCareSystem.Models
         public string Name {get; set;}
         public string ContactDetails {get; set;} 
         public string Region { get; set; } //Where they come from, dankie :)
-      public int AccountId { get; set; }//link to accounts table
-    public Accounts? Account { get; set; }
+      
+      [NotMapped]
         public List<Contract> Contracts { get; set; } = new();
     }
 }

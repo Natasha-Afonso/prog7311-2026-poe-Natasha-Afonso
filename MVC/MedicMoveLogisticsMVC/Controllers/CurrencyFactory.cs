@@ -1,4 +1,4 @@
-namespace prjHealthCareSystem.Controllers
+namespace MedicMoveLogisticsMVC.Controllers
 {
    // Refactoring Guru.2014.
     //The CurrencyFactory class is responsible for creating instances of ICurrencyStrategy based on the provided currency code. It uses a switch expression to determine which strategy to instantiate, making it easy to add new currencies in the future by simply adding new cases to the switch statement. This design adheres to the Open/Closed Principle, allowing the system to be open for extension but closed for modification.

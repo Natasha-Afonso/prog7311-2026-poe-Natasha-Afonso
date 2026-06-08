@@ -2,169 +2,193 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using prjHealthCareSystem.Data;
-using prjHealthCareSystem.Models;
+using MedicMoveLogisticsMVC.Data;
+using MedicMoveLogisticsMVC.Models;
+using MedicMoveLogisticsMVC.Services;
 
-namespace prjHealthCareSystem.Controllers
+
+
+namespace MedicMoveLogisticsMVC.Controllers
 {
     public class ServiceRequestController : Controller
     {
-        
-        //Use HttpClient to call the OpenExchangeRates API.
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
 
-
-       private readonly ApplicationDbContext _context;
-
-        public ServiceRequestController(ApplicationDbContext context, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        private readonly ServiceRequestsService _serviceRequestService;
+        private readonly ClientService _clientService;
+        private readonly ContractService _contractService;
+        public ServiceRequestController(ServiceRequestsService serviceRequestsService, ClientService clientService, ContractService contractService)
         {
-           
-            _context = context;
-            _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
+            _contractService = contractService;
+            _clientService = clientService;
+            _serviceRequestService = serviceRequestsService;
         }
         public async Task<IActionResult> Index()
         {
-            var serviceRequests = _context.ServiceRequests.Include(s => s.Contract).ThenInclude(c => c.Client);
-                 //IIE Emeris School of Computer Science,2025
+            //IIE Emeris School of Computer Science,2025
+            string role = HttpContext.Session.GetString("AccountRole");
+            ViewBag.AccountRole = role; // Pass the role to the view
 
- string role = HttpContext.Session.GetString("AccountRole");
- ViewBag.AccountRole = role; // Pass the role to the view
-        if (role == "Admin")
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            var allRequests = await _serviceRequestService.GetAllServiceRequestsAsync(token);
+            var search = allRequests.AsQueryable();
+
+            if (role == "Admin")
             {
-                
-         var requests = _context.ServiceRequests //DbSet<Contract>
-            .Include(c => c.Contract)
-            .ThenInclude(c => c.Client)
-            .AsQueryable();
-
-
-             return View(await requests.ToListAsync());
-
+                return View(search.ToList());
             }
-
             else if (role == "Client")
             {
-                int? accountId = HttpContext.Session.GetInt32("AccountID");
+                //Pull the active client id saved in session
+                int? sessionClientId = HttpContext.Session.GetInt32("AccountClientId");
 
-var client =_context.Clients.FirstOrDefault(c => c.AccountId == accountId);
 
-            if (client == null)
-            {
-            return RedirectToAction("Index", "Accounts");
+                if (sessionClientId == null)
+                {
+                    var allClients = await _clientService.GetAllClientsAsync(token);
+                    sessionClientId = allClients.FirstOrDefault(c => c.ContactDetails == HttpContext.Session.GetString("UserEmail"))?.Id;
+                }
+
+                if (sessionClientId == null)
+                {
+                    return RedirectToAction("Index", "Accounts");
+                }
+
+                var clientRequests = search.Where(r => r.Contract != null && r.Contract.ClientId == sessionClientId.Value).ToList();
+                return View(clientRequests);
             }
-
-              var requests = _context.ServiceRequests.Include(s => s.Contract)
-              .Where(p => p.Contract.ClientId == client.Id)
-                .ToList();
-                 return View(requests);
-            }
-             
             return RedirectToAction("Index", "Accounts");
-        
-
         }
-    
-        
+
         //create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName");
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+
+            var contracts = await _contractService.GetAllContractsAsync(token);
+
+            ViewData["ContractDropdown"] = new SelectList(contracts, "Id", "ContractName");
             return View();
         }
 
-       [HttpPost]
-        public async Task<IActionResult> Create(ServiceRequest serviceRequest)
+        [HttpPost]
+        public async Task<IActionResult> Create(ServiceRequests serviceRequest)
         {
-           
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            if (ModelState.IsValid)
+            {
+                try
+                {
 
-            var contract = await _context.Contracts.FindAsync((serviceRequest.ContractId));
-           
-            if(contract == null || contract.Status != "Active")
-            {
-                var errorMessage = "The selected contract is not active. Please select an active contract.";
-                ModelState.AddModelError("ContractId", errorMessage);
+                    await _serviceRequestService.CreateServiceRequestsAsync(serviceRequest, token);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"API ERROR:{ex.Message}");
+                }
             }
-           decimal exchangeRate = 0;
-            try
-            {
-                var strategy = CurrencyFactory.Create(serviceRequest.CurrencyFrom, _httpClientFactory, _configuration);
-                exchangeRate = await strategy.GetRateAsync();
-                
-            }
-            catch (ArgumentException ex)
-            {
-                ModelState.AddModelError("CurrencyFrom", ex.Message);
-            }
-            if(ModelState.IsValid)
-            {
-                
-                serviceRequest.Cost= serviceRequest.Amount * exchangeRate;
-                _context.Add(serviceRequest);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName", serviceRequest.ContractId);
-           
-     return View(serviceRequest);
-        }
-[HttpPost]
-        public async Task<IActionResult> Edit(int id, ServiceRequest serviceRequest)
-        {
-    
-            if(ModelState.IsValid)
-            {
-                _context.Update(serviceRequest);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ContractId"] = new SelectList(_context.Contracts, "Id", "ContractName", serviceRequest.ContractId);
+
+
+            var contracts = await _contractService.GetAllContractsAsync(token);
+            ViewData["ContractDropdown"] = new SelectList(contracts, "Id", "ContractName", serviceRequest.ContractId);
+
             return View(serviceRequest);
         }
 
-//Delete
-        public async Task<IActionResult> Delete(int? id)
+        //GET EDIT
+        public async Task<IActionResult> Edit(int id)
         {
-            var serviceRequest = _context.ServiceRequests
-            .Include(s => s.Contract)
-            .FirstOrDefaultAsync(s => s.Id == id);
-            return View(await serviceRequest);
+            try
+            {
+                var token = HttpContext.Session.GetString("JWTToken") ?? "";
+                var serviceRequest = await _serviceRequestService.GetServiceRequestsByIdAsync(id, token);
+                if (serviceRequest == null) return NotFound();
+                return View(serviceRequest);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"API ERROR: {ex.Message}");
+            }
         }
 
+        //POST 
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, ServiceRequests serviceRequest)
+        {
+            if (id != serviceRequest.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var token = HttpContext.Session.GetString("JWTToken") ?? "";
+                    await _serviceRequestService.UpdateServiceRequestsAsync(id, serviceRequest, token);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Failed to update via API: {ex.Message}");
+                }
+            }
+            return View(serviceRequest);
+        }
+
+        //GET DELETE
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            try
+            {
+                var token = HttpContext.Session.GetString("JWTToken") ?? "";
+                var serviceRequest = await _serviceRequestService.GetServiceRequestsByIdAsync(id.Value, token);
+                if (serviceRequest == null) return NotFound();
+                return View(serviceRequest);
+            }
+            catch (Exception ex)
+            {
+                return NotFound($"API ERROR: {ex.Message}");
+            }
+        }
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
-            var serviceRequest = await _context.ServiceRequests.FindAsync(id);
-            if(serviceRequest != null)
+            try
             {
-                _context.ServiceRequests.Remove(serviceRequest);
+                var token = HttpContext.Session.GetString("JWTToken") ?? "";
+                await _serviceRequestService.DeleteServiceRequestsAsync(id, token);
+                return RedirectToAction(nameof(Index));
             }
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-    }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Failed to delete the request through the AP: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
-
-    //Lastt Onneee
-    public async Task<IActionResult> Details(int? id)
+        //GET Details
+        public async Task<IActionResult> Details(int? id)
         {
-            if(id == null)
-            {
-                return NotFound();
-            }
-            var serviceRequest = _context.ServiceRequests
-            .Include(s => s.Contract)
-            .ThenInclude(c => c.Client)
-            .FirstOrDefaultAsync(m => m.Id == id); 
+            if (id == null) return NotFound();
 
-            
-            if(serviceRequest == null)
+            try
             {
-                return NotFound();
+                var token = HttpContext.Session.GetString("JWTToken") ?? "";
+                var serviceRequest = await _serviceRequestService.GetServiceRequestsByIdAsync(id.Value, token);
+                if (serviceRequest == null) return NotFound();
+
+                return View(serviceRequest);
+
             }
-            return View(await serviceRequest);
-}
+            catch (Exception ex)
+            {
+
+                return NotFound($"API ERROR: {ex.Message}");
+            }
+        }
     }
 
 }
+
+
+
