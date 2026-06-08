@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace prjHealthCareSystem.Models
+namespace MedicMoveLogisticsMVC.Models
 {
-    public class ServiceRequest
+    public class ServiceRequests
     {
         [Key]
         public int Id { get; set; }

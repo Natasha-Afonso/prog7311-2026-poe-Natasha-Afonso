@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using prjHealthCareSystem.Models;
+using MedicMoveLogisticsMVC.Models;
 
-namespace prjHealthCareSystem.Data
+namespace MedicMoveLogisticsMVC.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -10,6 +10,6 @@ namespace prjHealthCareSystem.Data
  public DbSet<Accounts> Accounts { get; set; }
         public DbSet<Client> Client { get; set; }
         public DbSet<Contract> Contract { get; set; }
-        public DbSet<ServiceRequest> ServiceRequests { get; set; }
+        public DbSet<ServiceRequests> ServiceRequests { get; set; }
     }
 }

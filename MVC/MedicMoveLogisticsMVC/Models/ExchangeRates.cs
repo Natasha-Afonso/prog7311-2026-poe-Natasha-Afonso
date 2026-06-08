@@ -1,4 +1,4 @@
-namespace prjHealthCareSystem
+namespace MedicMoveLogisticsMVC
 {
     public class ExchangeRates
     {

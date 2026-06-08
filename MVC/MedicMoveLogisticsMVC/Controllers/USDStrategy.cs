@@ -1,7 +1,7 @@
 using System.Text.Json;
-using prjHealthCareSystem.Controllers;
+using MedicMoveLogisticsMVC.Controllers;
 
-namespace prjHealthCareSystem.Controllers
+namespace   MedicMoveLogisticsMVC.Controllers
 {
     public class USDStrategy : ICurrencyStrategy
     {

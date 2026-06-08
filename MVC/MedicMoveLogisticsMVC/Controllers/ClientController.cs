@@ -1,119 +1,178 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using prjHealthCareSystem.Data;
-using prjHealthCareSystem.Models;
+using MedicMoveLogisticsMVC.Services;
+using MedicMoveLogisticsMVC.Models;
 
-namespace prjHealthCareSystem.Controllers
+namespace MedicMoveLogisticsMVC.Controllers
 {
     public class ClientController : Controller
     {
-        private readonly ApplicationDbContext _context;
 
-        public ClientController(ApplicationDbContext context)
+        private readonly ClientService _clientService;
+
+        public ClientController(ClientService clientService)
         {
-            _context = context;
+
+            _clientService = clientService;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Client.ToListAsync());
-            //Returns the whole list stored in the db
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Accounts");
+            }
+
+            if (role == "Admin")
+            {
+                var clients = await _clientService.GetAllClientsAsync(token);
+                ViewBag.AccountRole = "Admin"; // Pass the role to the view
+                return View(clients);
+            }
+            else if (role == "Client")
+            {
+                var accountId = HttpContext.Session.GetInt32("AccountClientId");
+                var client = await _clientService.GetClientByIdAsync(accountId.Value, token);
+                List<Client> clients = new List<Client>();
+                if (client != null)
+                {
+                    clients.Add(client);
+                }
+                ViewBag.AccountRole = "Client"; // Pass the role to
+                                                //Returns the whole list stored in the db, but the client will only see their own information because of the session check in the service method
+                return View(clients);
+            }
+            return RedirectToAction("Login", "Accounts");
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            var role = HttpContext.Session.GetString("AccountRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Index");
+            }
+            return View(new Client());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Client client)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(client); //Adds the new client 
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(client);
-        }
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
 
+            if (string.IsNullOrEmpty(token) || role != "Admin")
+            {
+                return RedirectToAction("Login", "Accounts");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(client);
+            }
+            await _clientService.CreateClientAsync(client, token);
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+            if (string.IsNullOrEmpty(token) || role != "Admin")
             {
-                return NotFound();
+                return RedirectToAction("Login", "Accounts");
             }
-
-            var client = await _context.Client.FindAsync(id);
+            var client = await _clientService.GetClientByIdAsync(id.Value, token);
             if (client == null)
             {
                 return NotFound();
             }
+
             return View(client);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(int id, Client client)
         {
-            if (id != client.Id)
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+
+            if (string.IsNullOrEmpty(token) || role != "Admin")
             {
-                return NotFound();
+                return RedirectToAction("Login", "Accounts");
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Update(client);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(client);
             }
-            return View(client);
+            await _clientService.UpdateClientAsync(id, client, token);
+            return RedirectToAction(nameof(Index));
         }
-            ////Details for a specific patient
-            public async Task<IActionResult>Details(int? id)
+        ////Details for a specific patient
+        public async Task<IActionResult> Details(int? id)
         {
-            if(id == null)
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+
+            if (string.IsNullOrEmpty(token))
             {
-                return NotFound();
+                return RedirectToAction("Login", "Accounts");
             }
 
-            //Find the client by their id
-            var client = await _context.Client.FirstOrDefaultAsync(m => m.Id == id); //LingQ
-            if (client == null)
-            {
-                return NotFound();
-            }
-            return View(client);
-
-        }
-
-        //Delete Methods
-     public async Task<IActionResult> Delete(int? id)
-        {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var client = await _context.Client.FirstOrDefaultAsync(m => m.Id == id);
-            if(client == null)
+            //Find the client by their id
+            var client = await _clientService.GetClientByIdAsync(id.Value, token);
+            if (client == null)
             {
                 return NotFound();
             }
-           
+            ViewBag.AccountRole = role; // Pass the role to the view
             return View(client);
-            
+
+        }
+
+        //Delete Methods
+        public async Task<IActionResult> Delete(int id)
+        {
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+
+            if (string.IsNullOrEmpty(token) || role != "Admin")
+            {
+                return RedirectToAction("Login", "Accounts");
+            }
+            var client = await _clientService.GetClientByIdAsync(id, token);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+
+            return View(client);
+
         }
         [HttpPost]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
-            var client = await _context.Client.FindAsync(id);
-            if(client != null)
+            var token = HttpContext.Session.GetString("JWTToken");
+            var role = HttpContext.Session.GetString("AccountRole");
+            var client = await _clientService.GetClientByIdAsync(id, token);
+            if (string.IsNullOrEmpty(token) || role != "Admin")
             {
-                _context.Client.Remove(client);
+                return RedirectToAction("Login", "Accounts");
             }
-            await _context.SaveChangesAsync();
+
+            await _clientService.DeleteClientAsync(id, token);
+
             return RedirectToAction(nameof(Index));
         }
     }

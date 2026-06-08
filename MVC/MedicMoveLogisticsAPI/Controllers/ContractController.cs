@@ -7,7 +7,7 @@ namespace MedicMoveLogisticsAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContractController : Controller
+    public class ContractController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 

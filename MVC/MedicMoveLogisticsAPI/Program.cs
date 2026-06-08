@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using MedicMoveLogisticsAPI.Data;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 namespace MedicMoveLogisticsAPI
 {
     public class Program
@@ -13,7 +16,21 @@ namespace MedicMoveLogisticsAPI
  // Add services to the container.
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")));
-
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "MedicMoveLogisticsIssuer",
+                        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "MedicMoveLogisticsAudience",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "ae1ff2e981a483faf7b29c6fa5f40d4c2e2cd877f76d0530afd3847b5988e585"))
+                    };
+                    
+                });
 
             builder.Services.AddControllers()
             .AddJsonOptions(options =>
@@ -37,6 +54,7 @@ namespace MedicMoveLogisticsAPI
 
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

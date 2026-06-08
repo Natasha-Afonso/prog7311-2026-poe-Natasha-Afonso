@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using prjHealthCareSystem.Data;
+using MedicMoveLogisticsMVC .Data;
+using MedicMoveLogisticsMVC.Services;
 
-namespace prjHealthCareSystem
+namespace MedicMoveLogisticsMVC
 {
     public class Program
     {
@@ -11,6 +12,11 @@ namespace prjHealthCareSystem
 
             // MVC
             builder.Services.AddControllersWithViews();
+            
+            builder.Services.AddHttpClient<ClientService>();
+            builder.Services.AddHttpClient<ContractService>();
+            builder.Services.AddHttpClient<AuthService>();
+            builder.Services.AddHttpClient<ServiceRequestsService>();
 
             // API Calls
             builder.Services.AddHttpClient();

@@ -1,16 +1,17 @@
-using MedicMoveLogisticsAPI.Data;
 using MedicMoveLogisticsAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MedicMoveLogisticsAPI.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MedicMoveLogisticsAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientController : Controller
+    [Authorize] //secures the API, only authenticated users can access it
+    public class ClientController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
         public ClientController(ApplicationDbContext context)
         {
             _context = context;
@@ -23,38 +24,33 @@ namespace MedicMoveLogisticsAPI.Controllers
             return await _context.Client.ToListAsync();
         }
 
-        // GET: api/Client/5
+        // GET: api/Client/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetById(int id)
+        public async Task<ActionResult<Client>> GetClient(int id)
         {
             var client = await _context.Client.FindAsync(id);
-
             if (client == null)
-            {
                 return NotFound();
-            }
 
             return client;
         }
 
         // POST: api/Client
         [HttpPost]
-        public async Task<ActionResult<Client>> Create(Client client)
+        public async Task<ActionResult<Client>> PostClient(Client client)
         {
             _context.Client.Add(client);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = client.Id }, client);
+            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
         }
-        //PUT: api/Client/5
+
+        // PUT: api/Client/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Client client)
+        public async Task<IActionResult> PutClient(int id, Client client)
         {
             if (id != client.Id)
-
                 return BadRequest();
-
-
             _context.Entry(client).State = EntityState.Modified;
 
             try
@@ -64,31 +60,28 @@ namespace MedicMoveLogisticsAPI.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!_context.Client.Any(e => e.Id == id))
-
                     return NotFound();
-
-
-
                 throw;
             }
-
-
             return NoContent();
         }
 
-        // DELETE: api/Client/5
+        // DELETE: api/Client/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await _context.Client.FindAsync(id);
             if (client == null)
                 return NotFound();
-
 
             _context.Client.Remove(client);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
+
+
     }
+
 }

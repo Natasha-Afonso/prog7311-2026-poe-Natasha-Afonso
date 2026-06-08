@@ -9,24 +9,24 @@ GO
 -- Switch to the Medic database
 USE Medic;
 GO
- -- Create Account Table
-CREATE TABLE Accounts (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Email NVARCHAR(255) NOT NULL,
-    Password NVARCHAR(255) NOT NULL,
-    Role NVARCHAR(50) NOT NULL
- 
-);
 -- Create Client Table
 CREATE TABLE Client (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
     ContactDetails NVARCHAR(255),
-    AccountID INT NOT NULL,
-    Region NVARCHAR(100),
-    CONSTRAINT FK_Clients_Accounts FOREIGN KEY (AccountID) 
-    REFERENCES Accounts(Id) ON DELETE CASCADE
+    Region NVARCHAR(100)
 );
+ -- Create Account Table
+CREATE TABLE Accounts (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Email NVARCHAR(255) NOT NULL UNIQUE,
+    Password NVARCHAR(255) NOT NULL,
+    Role NVARCHAR(50) NOT NULL,
+    ClientId INT NULL,
+    CONSTRAINT FK_Accounts_Client FOREIGN KEY (ClientId)
+        REFERENCES Client(Id) ON DELETE SET NULL
+);
+
 -- Create Contract Table
 CREATE TABLE Contract (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -61,29 +61,29 @@ VALUES
 ('sarah.connor@email.com', 'Password@124', 'Admin'),
 ('thabo.mokoena@email.com', 'Password@124', 'Client');
 -- Insert Dummy Clients
-    INSERT INTO Client (Name, ContactDetails,AccountID , Region)
+    INSERT INTO Client (Name, ContactDetails , Region)
     VALUES 
-('John Smith', 'john.smith@email.com', 1, 'Gauteng'),
-('Sarah Connor', '555-0199', 2, 'Western Cape'),
-('Thabo Mokoena', 'thabo.m@provider.co.za', 3, 'KwaZulu-Natal');
+('John Smith', 'john.smith@email.com',  'Gauteng'),
+('Sarah Connor', '555-0199', 'Western Cape'),
+('Thabo Mokoena', 'thabo.m@provider.co.za',  'KwaZulu-Natal');
 -- Insert Dummy Accounts
-INSERT INTO Accounts (Email, Password, Role)
+INSERT INTO Accounts (Email, Password, Role, ClientId)
 VALUES 
-('john.smith@email.com', 'Password@124', 'Client'),
-('sarah.connor@email.com', 'Password@124', 'Admin'),
-('thabo.mokoena@email.com', 'Password@124', 'Client');
+('john.smith@email.com', 'Password@124', 'Client',1),
+('sarah.connor@email.com', 'Password@124', 'Admin',0),
+('thabo.mokoena@email.com', 'Password@124', 'Client',2);
 -- Insert Dummy Contracts
 INSERT INTO Contract ( ClientId, ContractName, StartDate, EndDate, Status, ServiceLevel)
 VALUES 
 ( 1, 'Contract', '2025-01-01', '2026-01-01', 'Active', 'Gold'),
 (2, 'ContractThree', '2025-03-15', '2026-03-15', 'Active', 'Platinum'),
-( 3, 'ContractFour', '2025-01-01', '2025-12-31', 'Active', 'Bronze');
+( 2, 'ContractFour', '2025-01-01', '2025-12-31', 'Active', 'Bronze');
 -- Insert Dummy ServiceRequest
 INSERT INTO ServiceRequests (ContractId, Description, CurrencyFrom, Amount, Cost, Status)
 VALUES 
 (1, 'Annual Physical Examination','USD', 1200.00, 1200.00, 'Completed'),
 (2, 'Blood Work - Routine Check', 'JPY', 450.50, 450.50, 'Pending'),
-(3, 'Dental Wisdom Tooth Extraction', 'USD', 3500.00, 3500.00, 'Confirmed');
+(1, 'Dental Wisdom Tooth Extraction', 'USD', 3500.00, 3500.00, 'Confirmed');
 GO
  
  

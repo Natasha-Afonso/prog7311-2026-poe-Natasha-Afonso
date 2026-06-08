@@ -1,13 +1,13 @@
-@model prjHealthCareSystem.Models.ServiceRequest
+@model MedicMoveLogisticsMVC.Models.ServiceRequests
 
 @{
-    ViewData["Title"] = "Delete Service Request";
+    ViewData["Title"] = "Details";
 }
 
-<h1>Delete Service Request</h1>
+<h1>Details</h1>
 
 <div>
-    <h4>Service Request</h4>
+    <h4>MedicalAppointment</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -16,29 +16,24 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Id)
         </dd>
-        
         <dt class = "col-sm-2">
-            Insurance Policy
+            @Html.DisplayNameFor(model => model.ContractId)
         </dt>
         <dd class = "col-sm-10">
-            
-            @Model.Contract?.ContractName (Client: @Model.Contract?.Client?.Name)
+            @Html.DisplayFor(model => model.ContractId)
         </dd>
-        
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Cost)
         </dt>
         <dd class = "col-sm-10">
-            @Model.Cost.ToString("C")
+            @Html.DisplayFor(model => model.Cost)
         </dd>
-        
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Status)
         </dt>
@@ -48,6 +43,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a> |
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    <a asp-action="Index">Back to List</a>
 </div>

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using MedicMoveLogisticsAPI.Models;
 
 namespace MedicMoveLogisticsAPI.Models
@@ -22,11 +23,13 @@ namespace MedicMoveLogisticsAPI.Models
         [RegularExpression(@"^([a-zA-Z0-9@*#]{8,15})$", ErrorMessage = "Password must contain: Minimum 8 characters, at least 1 UpperCase Alphabet, 1 LowerCase Alphabet, 1 Number, and 1 Special Character")]
         public string Password { get; set; }
 
-    
+    [Required(ErrorMessage = "Please select a role")]
         public string Role { get; set; } 
 
-       public Client? Client { get; set; }
+       public int? ClientId { get; set; }
      
+         [ForeignKey("ClientId")]
+         public virtual Client? Client { get; set; }
     }
 }
 /*REFERENCES
