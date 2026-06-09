@@ -1,5 +1,23 @@
-﻿<!DOCTYPE html>
+﻿@{
+    string role = Context.Session.GetString("AccountRole") ?? "";
+    string dashboardUrl = Url.Action("Index", "Accounts");
+    if (role == "Admin")
+    {
+        dashboardUrl = Url.Action("Index", "Admin");
+    }
+    else if (role == "Driver")
+    {
+        dashboardUrl = Url.Action("Index", "Driver");
+    }
+    else if (role == "Client")
+    {
+        dashboardUrl = Url.Action("Index", "Client");
+    }
+}
+}
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,42 +27,47 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/prjHealthCareSystem.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MedicMoveLogistics</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+<body>
+
+
+    <header>
+        <div class="wrap"
+             style="display:flex; align-items:center; justify-content:space-between; gap: 14px; flex-wrap: wrap;">
+            <div class="brand"><i>🚑</i> <span>MedicMove</span> <span class="pill"><span class="dot"></span>
+                Logistics</span></div>
+                <nav class="tabs" role="tablist" aria-label="Primary">
+                    <button class="tab-btn" role="tab" aria-selected="false"
+                            onclick="window.location.href='@dashboardUrl'">DashBoard</button>
+                    <button class="tab-btn" role="tab" aria-selected="false"
+                            onclick="window.location.href='@Url.Action("Index", "ServiceRequests")'">Service Requests</button>
+                    <button class="tab-btn" role="tab" aria-selected="false"
+                            onclick="window.location.href='@Url.Action("Index", "Contract")'">Contracts</button>
+                    <button class="tab-btn" role="tab" aria-selected="false"
+                            onclick="window.location.href='@Url.Action("Logout", "Accounts")'">Logout</button>
+
+
+                </nav>
+            </div>
+        </header>
+
         <div class="container">
-            &copy; 2026 - prjHealthCareSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+
+        <footer class=" text-muted py-3 fs-7">
+            <div class="container text-center">
+                <span>&copy; 2026 - MedicMove Logistics </span>
+                <span class="mx-2">POE</span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
+
 </html>
