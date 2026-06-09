@@ -142,6 +142,7 @@
         }
     </style>
 </head>
+<<<<<<< Updated upstream
 
 
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
@@ -210,3 +211,109 @@
     </tbody>
 </table>
 
+=======
+<div class="wrap">
+    <div class="card tab" id="tab-jobs" role="tabpanel">
+        <div class="hd">
+            <h2>All Jobs</h2>
+            <a asp-action="Create" class="btn btn-primary">Create New Request</a>
+        </div>
+        <div class="bd">
+            <div id="jobsList" class="list">
+                @foreach (var item in Model) {
+                    <div class="list-item">
+                        
+                        <div class="item-details">
+                            <div class="item-meta-header">
+                                <span class="item-id">#@item.Id</span>
+                                <strong class="item-title">@item.Contract?.ContractName</strong>
+                                
+                                @{
+                                    var statusClass = "status-default";
+                                    if (item.Status == "Pending Approval") statusClass = "status-pending";
+                                    else if (item.Status == "Approved") statusClass = "status-approved";
+                                    else if (item.Status == "Picked Up") statusClass = "status-pickedup";
+                                    else if (item.Status == "On The Way") statusClass = "status-ontheway";
+                                    else if (item.Status == "Delivered") statusClass = "status-delivered";
+                                }
+                                <span class="pill @statusClass">@item.Status</span>
+                            </div>
+                            
+                            <div class="item-subtext">
+                                <span>Patient: @item.Contract?.Client?.Name</span>
+                                <span>•</span>
+                                <span>@item.Description</span>
+                                @if (!string.IsNullOrEmpty(item.AssignedVehicleType)) {
+                                    <span>•</span>
+                                    <span class="vehicle-indicator">🚚 @item.AssignedVehicleType</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="item-actions-zone">
+                            <div class="item-cost">
+                                @item.Cost.ToString("C")
+                            </div>
+
+                            @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending Approval") {
+                                <div class="actions-flex">
+                                    <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                                        <button type="submit" class="btn btn-ghost btn-sm" style="color: #16a34a; border-color: rgba(22,163,74,0.3);">Approve</button>
+                                    </form>
+                                    <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                                        <button type="submit" class="btn btn-ghost btn-sm" style="color: #dc2626; border-color: rgba(220,38,38,0.3);">Deny</button>
+                                    </form>
+                                </div>
+                            }
+
+                            @if (ViewBag.AccountRole == "Client") {
+                                <div class="actions-flex">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-ghost">Edit</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-ghost">Details</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
+                            }
+
+                            @if (ViewBag.AccountRole == "Driver") {
+                                <div class="actions-flex">
+                                    @if (item.Status == "Approved") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="Picked Up" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Pick Up Cargo</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "Picked Up") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="On The Way" />
+                                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #a855f7, #9333ea);">Start Transit</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "On The Way") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="Delivered" />
+                                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #10b981, #059669);">Mark Delivered</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "Delivered") {
+                                        <span class="pill status-delivered" style="gap: 4px;">
+                                            <span class="material-icons" style="font-size: 14px;">check_circle</span> Complete
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!--References
+Fadae.2025.CodePen Home.Frosted Glass User Dashboard UI – Sleek & Responsive Design.[sourcecode] Availabla at:<https://codepen.io/nimafadaei/pen/ZYbLPVe> [Accessed 20 October]
+Robert Williams.2026.SEND IT QUICK COURIER SERVICE.(Version 10)[source code]. Available at: < https://codepen.io/dasia16/pen/azvEBBp > [Accessed 5 June 2026]
+-->
+>>>>>>> Stashed changes
