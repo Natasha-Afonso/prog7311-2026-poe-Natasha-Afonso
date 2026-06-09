@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using MedicMoveLogisticsMVC.Services;
 using MedicMoveLogisticsMVC.Models;
@@ -22,6 +21,7 @@ namespace MedicMoveLogisticsMVC.Controllers
             var token = HttpContext.Session.GetString("JWTToken");
             var role = HttpContext.Session.GetString("AccountRole");
 
+
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login", "Accounts");
@@ -35,8 +35,14 @@ namespace MedicMoveLogisticsMVC.Controllers
             }
             else if (role == "Client")
             {
-                var accountId = HttpContext.Session.GetInt32("AccountClientId");
-                var client = await _clientService.GetClientByIdAsync(accountId.Value, token);
+                int? sessionClientId = HttpContext.Session.GetInt32("AccountClientId");
+
+                if (sessionClientId == null)
+                {
+                    return RedirectToAction("Index", "Accounts");
+                            }
+                
+                var client = await _clientService.GetClientByIdAsync(sessionClientId.Value, token);
                 List<Client> clients = new List<Client>();
                 if (client != null)
                 {
@@ -78,7 +84,7 @@ namespace MedicMoveLogisticsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
             var token = HttpContext.Session.GetString("JWTToken");
             var role = HttpContext.Session.GetString("AccountRole");
@@ -86,7 +92,7 @@ namespace MedicMoveLogisticsMVC.Controllers
             {
                 return RedirectToAction("Login", "Accounts");
             }
-            var client = await _clientService.GetClientByIdAsync(id.Value, token);
+            var client = await _clientService.GetClientByIdAsync(id, token);
             if (client == null)
             {
                 return NotFound();

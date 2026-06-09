@@ -10,13 +10,13 @@ using MedicMoveLogisticsMVC.Services;
 
 namespace MedicMoveLogisticsMVC.Controllers
 {
-    public class ServiceRequestController : Controller
+    public class ServiceRequestsController : Controller
     {
 
         private readonly ServiceRequestsService _serviceRequestService;
         private readonly ClientService _clientService;
         private readonly ContractService _contractService;
-        public ServiceRequestController(ServiceRequestsService serviceRequestsService, ClientService clientService, ContractService contractService)
+        public ServiceRequestsController(ServiceRequestsService serviceRequestsService, ClientService clientService, ContractService contractService)
         {
             _contractService = contractService;
             _clientService = clientService;
@@ -35,6 +35,12 @@ namespace MedicMoveLogisticsMVC.Controllers
             if (role == "Admin")
             {
                 return View(search.ToList());
+            }
+            else if (role == "Driver")
+            {
+                //Drivers dont see non approved stuff
+                var approvedRequests = search.Where(r => r.Status != "Pending Approval").ToList();
+                return View(approvedRequests);
             }
             else if (role == "Client")
             {
@@ -66,7 +72,7 @@ namespace MedicMoveLogisticsMVC.Controllers
 
             var contracts = await _contractService.GetAllContractsAsync(token);
 
-            ViewData["ContractDropdown"] = new SelectList(contracts, "Id", "ContractName");
+            ViewBag.ContractId = new SelectList(contracts, "Id", "ContractName");
             return View();
         }
 
@@ -78,7 +84,24 @@ namespace MedicMoveLogisticsMVC.Controllers
             {
                 try
                 {
+                    if (serviceRequest.Condition == "Cold-Chain (<9 degrees Celcius)")
+                    {
 
+                        serviceRequest.AssignedVehicleType = "Refrigerated Truck";
+                    }
+                    else if (serviceRequest.PackageSize == "Large")
+                    {
+                        serviceRequest.AssignedVehicleType = "Heavy Cargo Van";
+                    }
+                    else if (serviceRequest.Speed == "Rush" || serviceRequest.Speed == "Express")
+                    {
+                        serviceRequest.AssignedVehicleType = "Express Vehicle";
+                    }
+                    else
+                    {
+                        serviceRequest.AssignedVehicleType = "Standard Vehicle";
+                    }
+                    serviceRequest.Status = "Pending Approval";
                     await _serviceRequestService.CreateServiceRequestsAsync(serviceRequest, token);
                     return RedirectToAction(nameof(Index));
                 }
@@ -90,9 +113,35 @@ namespace MedicMoveLogisticsMVC.Controllers
 
 
             var contracts = await _contractService.GetAllContractsAsync(token);
-            ViewData["ContractDropdown"] = new SelectList(contracts, "Id", "ContractName", serviceRequest.ContractId);
+            ViewBag.ContractId = new SelectList(contracts, "Id", "ContractName", serviceRequest.ContractId);
 
             return View(serviceRequest);
+        }
+        //Saha, D.2024
+        //Speed dropdown if contract is premium
+        [HttpPost]
+        public async Task<JsonResult> GetSpeedOptions(string contractId)
+        {
+            var token = HttpContext.Session.GetString("JWTToken") ?? "";
+            var optionsList = new List<object>();
+            if (!string.IsNullOrEmpty(contractId))
+            {
+                int id = Convert.ToInt32(contractId);
+                var chosenContract = await _contractService.GetContractByIdAsync(id, token);
+
+                //if contract is basinc restrict options
+                if (chosenContract != null && chosenContract.ServiceLevel == "Basic")
+                {
+                    optionsList.Add(new { value = "Standard", text = "Standard Delivery (Contract Limit)" });
+                }
+                else
+                {
+                    optionsList.Add(new { value = "Standard", text = "Standard Delivery" });
+                    optionsList.Add(new { value = "Express", text = "Express Delivery" });
+                    optionsList.Add(new { value = "Rush", text = "Rush High priority" });
+                }
+            }
+            return Json(optionsList);
         }
 
         //GET EDIT
@@ -190,5 +239,8 @@ namespace MedicMoveLogisticsMVC.Controllers
 
 }
 
+/*References
+Saha, D.2024. Implement Cascading Dropdown In ASP.NET Core MVC Application Using InMemory DB.(Version 10)[source code]. Available at: < https://www.c-sharpcorner.com/article/implement-cascading-dropdown-in-asp-net-core-mvc-application-using-inmemory-db/ > [Accessed 7 June 2026]
+ */
 
 

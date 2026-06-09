@@ -62,12 +62,12 @@ namespace MedicMoveLogisticsMVC.Controllers
 
                 await _serviceRequestService.UpdateServiceRequestsAsync(id.Value, request, token);
 
-                return RedirectToAction(nameof(Index)); // show the updated list
+                return RedirectToAction("Index", "ServiceRequests"); // show the updated list
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Failed to approve: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "ServiceRequests");
             }
         }
 

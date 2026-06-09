@@ -1,28 +1,136 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Advanced CI/CD Integration Pipeline
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  build:
-
-    runs-on: windows-latest
-
+  # JOB 1: Validates code layout, syntax formatting, and compilation rules early
+  code-quality:
+    name: Code Quality & Formatting
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK (Dual Frameworks)
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+        dotnet-version: |
+          8.0.x
+          10.0.x
+        cache: true
+        cache-dependency-path: '**/*.csproj'
+
+    - name: Verify Code Formatting
+      run: dotnet format --verify-no-changes --severity warn
+
+    - name: Static Code Analysis
+      run: dotnet build --configuration Release /warnaserror
+
+  # JOB 2: Compiles the source files inside target Docker configurations
+  compile-and-build:
+    name: Docker Build & Package
+    runs-on: ubuntu-latest
+    needs: code-quality
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+   
+    - name: Setup .NET SDK (Dual Frameworks)
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+        cache: true
+        cache-dependency-path: '**/*.csproj'
+   
+    - name: Build Application Containers
+      run: docker compose build
+
+  # JOB 3: Spins up container layout and evaluates cross-dependency integrations
+  integration-testing:
+    name: System Integration Verification
+    runs-on: ubuntu-latest
+    needs: compile-and-build
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK (Dual Frameworks)
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+        cache: true
+        cache-dependency-path: '**/*.csproj'
+
+    - name: Build and Launch Application Mesh
+      run: docker compose up --build -d
+
+    - name: Grace Period for Database Boot
+      run: |
+        echo "Giving Microsoft SQL Server 25 seconds to complete table setups..."
+        sleep 25
+
+    - name: Wait for API Readiness
+      run: |
+        echo "Waiting for MedicLogisticsAPI to wake up at http://localhost:8080..."
+        timeout 60s sh -c 'until curl -sSf http://localhost:8080/api/ServiceRequests > /dev/null; do sleep 2; done'
+        echo "MedicLogicAPI is up and running!"
+   
+    - name: Integration Step 1 - Seed Data via API
+      run: |
+        echo "Posting a new medic payload to the database..."
+        curl -X POST http://localhost:8080/api/ServiceRequests \
+          -H "Content-Type: application/json" \
+          -d '{"description":"Emergency Vaccine Run", "amount": 250.00, "currencyFrom": "JPY", "status": "Pending Admin Approval", "contractId": 1, "condition": "Cold Chain","packageSize": "small", "speed": "Rush", "assignedVehicleType": "Express Vehicle"}' \
+          --fail --verbose
+   
+    - name: Integration Step 2 - Verify Front-End MVC Data Rendering
+      run: |
+        echo "MVC wake up"
+        sleep 10
+
+        echo "Querying the MVC web application home page on port 80..."
+        MVC_RESPONSE=$(curl -s http://localhost:80)
+
+        echo "Asserting that the front-end view successfully displays the dynamic API string context..."
+        if echo "$MVC_RESPONSE" | grep -q "Vaccine"; then
+          echo "SUCCESS: MVC interface successfully fetched and displayed containerized API data!"
+        else
+          echo "ERROR: Data assertion failed. The MVC home page is not showing the injected database string payload."
+          echo "$MVC_RESPONSE"
+          exit 1
+        fi
+   
+    - name: Tear Down Mesh and Logs
+      if: always()
+      run: |
+        docker compose logs api-service > api-container-debug.log || true
+        docker compose logs medic-db-service > db-container-debug.log || true
+        docker compose logs mvc-service > mvc-container-debug.log || true
+        docker compose down --volumes
+
+  # JOB 4: Automated continuous delivery task gated behind previous validation approvals
+  cd-deployment:
+    name: Production Cloud deployment
+    runs-on: ubuntu-latest
+    needs: integration-testing
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: Production
+    steps:
+    - name: Execute Server Infrastructure Sync
+      run: |
+        echo "All automated tests passed cleanly. Initiating production handshake scripts..."

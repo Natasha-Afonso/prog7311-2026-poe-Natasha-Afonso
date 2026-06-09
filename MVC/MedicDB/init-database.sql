@@ -1,6 +1,6 @@
  USE master;
 GO
--- Create the Farm database only if it does not already exist
+-- Create the Medic database only if it does not already exist
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'Medic')
 BEGIN
     CREATE DATABASE Medic;
@@ -49,22 +49,20 @@ CREATE TABLE ServiceRequests (
     CurrencyFrom NVARCHAR(3) NOT NULL,
     Amount DECIMAL(18, 2) NOT NULL,
     Cost DECIMAL(18, 2) NOT NULL,
+    PackageSize NVARCHAR (50),
+    Condition NVARCHAR (50),
+    Speed NVARCHAR (50),
+    AssignedVehicleType NVARCHAR (50),
     Status NVARCHAR(50),
     CONSTRAINT FK_ServiceRequests_Contracts FOREIGN KEY (ContractId) 
         REFERENCES Contract(Id) ON DELETE CASCADE
 );
 GO
--- Insert Dummy Accounts
-INSERT INTO Accounts (Email, Password, Role)
-VALUES 
-('john.smith@email.com', 'Password@124', 'Client'),
-('sarah.connor@email.com', 'Password@124', 'Admin'),
-('thabo.mokoena@email.com', 'Password@124', 'Client');
+
 -- Insert Dummy Clients
     INSERT INTO Client (Name, ContactDetails , Region)
     VALUES 
 ('John Smith', 'john.smith@email.com',  'Gauteng'),
-('Sarah Connor', '555-0199', 'Western Cape'),
 ('Thabo Mokoena', 'thabo.m@provider.co.za',  'KwaZulu-Natal');
 -- Insert Dummy Accounts
 INSERT INTO Accounts (Email, Password, Role, ClientId)
@@ -75,15 +73,15 @@ VALUES
 -- Insert Dummy Contracts
 INSERT INTO Contract ( ClientId, ContractName, StartDate, EndDate, Status, ServiceLevel)
 VALUES 
-( 1, 'Contract', '2025-01-01', '2026-01-01', 'Active', 'Gold'),
-(2, 'ContractThree', '2025-03-15', '2026-03-15', 'Active', 'Platinum'),
-( 2, 'ContractFour', '2025-01-01', '2025-12-31', 'Active', 'Bronze');
+( 1, 'Contract', '2025-01-01', '2026-01-01', 'Active', 'Premium'),
+(2, 'ContractThree', '2025-03-15', '2026-03-15', 'Active', 'Premium'),
+( 2, 'ContractFour', '2025-01-01', '2025-12-31', 'Active', 'Basic');
 -- Insert Dummy ServiceRequest
-INSERT INTO ServiceRequests (ContractId, Description, CurrencyFrom, Amount, Cost, Status)
+INSERT INTO ServiceRequests (ContractId, Description, CurrencyFrom, Amount, Cost, PackageSize, Condition, Speed, AssignedVehicleType, Status)
 VALUES 
-(1, 'Annual Physical Examination','USD', 1200.00, 1200.00, 'Completed'),
-(2, 'Blood Work - Routine Check', 'JPY', 450.50, 450.50, 'Pending'),
-(1, 'Dental Wisdom Tooth Extraction', 'USD', 3500.00, 3500.00, 'Confirmed');
+(1, 'Gallons of blood','USD', 1200.00, 1200.00,'Large','Cold-Chain','Express', 'Express Vehicle', 'Completed'),
+(2, 'Blood Work - Routine Check', 'JPY', 450.50, 450.50, 'Large','Cold-Chain','Express', 'Express Vehicle',  'Pending'),
+(1, 'Dental Wisdom Tooth Extraction', 'USD', 3500.00, 3500.00, 'Large','Cold-Chain','Standard', 'Heavy Cargo Van',  'Confirmed');
 GO
  
  

@@ -16,6 +16,7 @@ namespace MedicMoveLogisticsAPI
  // Add services to the container.
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")));
+        
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -38,6 +39,7 @@ namespace MedicMoveLogisticsAPI
         // This tells the serializer to ignore loops instead of crashing
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+    builder.Services.AddHttpClient();
             builder.Services.AddOpenApi(); // Keeps the native engine
             var app = builder.Build();
             if (true)
