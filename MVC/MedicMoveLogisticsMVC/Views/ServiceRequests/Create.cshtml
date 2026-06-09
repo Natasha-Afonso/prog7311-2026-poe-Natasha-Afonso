@@ -6,63 +6,156 @@
 <h1>Create</h1>
 
 <h4>Service Request</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="card tab" id="tab-book" role="tabpanel">
+  <div class="hd">
+    <h2>Book a Service Delivery</h2>
+    <span class="pill"><span class="dot"></span> Instant quote</span>
+  </div>
+  <div class="bd">
+    <form asp-action="Create" method="post" id="bookForm" class="grid">
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+      <div class="row row-2">
+        <div>
+          <label asp-for="ContractId">Active Contract Allocation</label>
+          <select asp-for="ContractId" class="form-select" asp-items="ViewBag.ContractId" required>
+            <option value="">-- Select an Active Contract --</option>
+          </select>
+          <span asp-validation-for="ContractId" class="text-danger"></span>
+        </div>
+        <div>
+          <label asp-for="Description">Manifest Description / Notes</label>
+          <input asp-for="Description" class="form-control" placeholder="e.g. Medical Supplies, Documents" required />
+          <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div>
+          <label asp-for="Amount">Enter Amount</label>
+          <input asp-for="Amount" class="form-control" type="number" min="0" step="0.01" placeholder="0.00" required />
+          <span asp-validation-for="Amount" class="text-danger"></span>
+        </div>
+        <div>
+          <label asp-for="CurrencyFrom">Convert Currency Base</label>
+          <div style="display: flex; gap: 4px; width: 100%;">
+            <select asp-for="CurrencyFrom" class="form-select" style="flex: 1;">
+              <option value="USD">USD</option>
+              <option value="JPY">JPY</option>
+              <option value="CNY">CNY</option>
+            </select>
+            <span style="align-self: center; padding: 0 4px; color: var(--muted); font-size: 13px;">to</span>
+            <input class="form-control" value="ZAR" readonly style="width: 70px; text-align: center;" />
+          </div>
+          <span asp-validation-for="CurrencyFrom" class="text-danger"></span>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div>
+          <label asp-for="Cost">Converted Cost (ZAR)</label>
+          <input  class="form-control" value="@Model?.Cost" placeholder="—" readonly />
+        
+        </div>
+        <div>
+          <label asp-for="Status">Initial Security Status State</label>
+          <input asp-for="Status" class="form-control" value="Pending Approval" readonly />
+          <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div>
+          <label asp-for="PackageSize">Package Size Matrix</label>
+          <select asp-for="PackageSize" class="form-select">
+            <option value="Small">Small (envelope)</option>
+            <option value="Medium" selected>Medium (shoebox)</option>
+            <option value="Large">Large (moving box)</option>
+          </select>
+          <span asp-validation-for="PackageSize" class="text-danger"></span>
+        </div>
+        <div>
+          <label asp-for="Condition">Environmental Constraints</label>
+          <select asp-for="Condition" class="form-select">
+            <option value="Standard" selected>Standard Room Temp</option>
+            <option value="Cold-Chain">Cold-Chain Monitor</option>
+            <option value="Fragile">Fragile Protocol</option>
+          </select>
+          <span asp-validation-for="Condition" class="text-danger"></span>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div>
+          <label asp-for="Speed">Delivery Urgency Speed</label>
+          <select asp-for="Speed" class="form-select">
+            <option value="Standard" selected>Standard (by 8pm)</option>
+            <option value="Express">Express (4h)</option>
+            <option value="Rush">Rush (2h)</option>
+          </select>
+          <span asp-validation-for="Speed" class="text-danger"></span>
+        </div>
+        <div>
+          <label asp-for="AssignedVehicleType">Assigned Dispatch Fleet Vehicle</label>
+          <select asp-for="AssignedVehicleType" class="form-select">
+            <option value="Motorbike">Courier Motorbike</option>
+            <option value="Van" selected>Logistics Transit Van</option>
+            <option value="Truck">Refrigerated Heavy Cargo Truck</option>
+          </select>
+          <span asp-validation-for="AssignedVehicleType" class="text-danger"></span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap: 10px; align-items:center;">
+        <button class="btn btn-primary" type="submit">Create Appointment</button>
+        <a asp-action="Index" class="btn btn-ghost" style="text-decoration:none; text-align:center;">Back to List</a>
+        <div class="right pill" id="quotePill"><span class="dot"></span> $—</div>
+      </div>
+    </form>
+  </div>
+</div>
+<!--C# corner-->
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        function loadSpeedOptions(obj) {
+            var selectedContractId = obj.value;
+            var $dropdown = $("#Speed"); 
             
-            <div class="form-group mb-3">
-                <label asp-for="ContractId" class="control-label fw-bold"></label>
-                
-                <select asp-for="ContractId" class="form-select" asp-items="ViewBag.ContractId">
-                    <option value="">-- Select an Active Contract --</option>
-                </select>
-                <span asp-validation-for="ContractId" class="text-danger"></span>
-            </div>
+            $dropdown.empty();
 
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
+            if (!selectedContractId) {
+                $dropdown.append("<option value=''>-- Choose Contract Above --</option>");
+                return;
+            }
 
-            <div class="form-group mb-3">
-                <label asp-for="Amount" class="control-label fw-bold">Enter Amount</label>
-                 <input asp-for="Amount" class="form-control" type="number" step="0.01 " />
-                  <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
+            $dropdown.append("<option value=''>Loading...</option>");
+            
+            $.post("/ServiceRequests/GetSpeedOptions", { contractId: selectedContractId }, function (data) {
+                $dropdown.empty();
+                if (data && data.length > 0) {
+                    $.each(data, function (index, item) {
+                        $dropdown.append("<option value='" + item.value + "'>" + item.text + "</option>");
+                    });
+                } else {
+                    $dropdown.append("<option value=''>No options available</option>");
+                }
+            }).fail(function() {
+                $dropdown.empty();
+                $dropdown.append("<option value=''>Error loading options</option>");
+            });
+        }
 
-            <div class="form-group mb-3">
-                <label class="control-label" fw-bold>Convert Currency</label>
-                <div class="input-group">
-                <select asp-for="CurrencyFrom" class="form-select">
-                    <option value="USD">USD</option>
-                    <option value="JPY">JPY</option>
-                    <option value="CNY">CNY</option>
-                </select>
-                <span class="input-group-text">to</span>
-                <input class="form-control" value="ZAR" readonly />
-                </div>
-                </div>
-             <div class="form-group mb-3">
-                <label class="control-label">Converted Cost(ZAR)</label>
-                <input class="form-control" value="@Model?.Cost" readonly />
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" value="Pending" readonly />
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Create Appointment" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+        document.addEventListener("DOMContentLoaded", function () {
+            var contractSelect = document.getElementById("ContractId");
+            if (contractSelect) {
+                contractSelect.addEventListener("change", function() {
+                    loadSpeedOptions(this);
+                });
+            }
+        });
+    </script>
+}
+<!--References
+Robert Williams.2026.SEND IT QUICK COURIER SERVICE.(Version 10)[source code]. Available at: < https://codepen.io/dasia16/pen/azvEBBp > [Accessed 5 June 2026] -->

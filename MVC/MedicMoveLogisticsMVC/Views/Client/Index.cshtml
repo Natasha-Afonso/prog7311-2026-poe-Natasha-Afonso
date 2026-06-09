@@ -1,53 +1,40 @@
-@model IEnumerable<MedicMoveLogisticsMVC.Models.Client>
+<div class="card tab" id="tab-driver" role="tabpanel">
+  <div class="hd">
+    <h2>Client Information</h2>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+  </div>
+  <div class="bd">
+    <div id="driverList" class="list">
+      @foreach (var item in Model) {
+        <div class="list-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); gap: 16px;">
+          
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="font-weight: 600; font-size: 14px;">#@item.Id</span>
+              <strong>@item.Name</strong>
+            </div>
+            
+            <div style="font-size: 13px; color: var(--muted); line-height: 1.4;">
+              <span>Contact: @item.ContactDetails</span>
+            </div>
+          </div>
 
-@{
-    ViewData["Title"] = "Index";
-}
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 13px; font-weight: 600; text-align: right; min-width: 100px;">
+              <span class="pill" style="display: inline-block; padding: 2px 8px; background: rgba(0,0,0,0.04); border-radius: 4px;">
+                @item.Region
+              </span>
+            </div>
 
-<h1>Index</h1>
+            <div style="display: flex; gap: 4px;">
+              <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+              <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+            </div>
+          </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ContactDetails)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Region)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ContactDetails)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Region)
-            </td>
-            <td>
-    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-</td>
-        </tr>
-}
-    </tbody>
-</table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

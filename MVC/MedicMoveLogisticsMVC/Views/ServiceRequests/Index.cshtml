@@ -142,71 +142,60 @@
         }
     </style>
 </head>
-
-
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-    <h1>Service Requests</h1>
+<div class="card tab" id="tab-jobs" role="tabpanel">
+  <div class="hd">
+    <h2>All Jobs</h2>
     <a asp-action="Create" class="btn btn-primary">Create New Request</a>
-</div>
+  </div>
+  <div class="bd">
+    <div id="jobsList" class="list">
+      @foreach (var item in Model) {
+        <div class="list-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); gap: 16px;">
+          
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="font-weight: 600; font-size: 14px;">#@item.Id</span>
+              <strong>@item.Contract?.ContractName</strong>
+              @{
+                var statusClass = item.Status == "Pending" ? "bg-primary" : "bg-success";
+              }
+              <span class="badge @statusClass">@item.Status</span>
+            </div>
+            
+            <div style="font-size: 13px; color: var(--muted); line-height: 1.4;">
+              <span>Patient: @item.Contract?.Client?.Name</span>
+              <span style="margin: 0 8px;">•</span>
+              <span>@item.Description</span>
+            </div>
+          </div>
 
-<table class="table table-hover shadow-sm bg-white rounded">
-    <thead class="table-light">
-        <tr>
-            <th>ID</th>
-           
-            <th>Billing Policy & Patient</th>
-            <th>@Html.DisplayNameFor(model => model.Description)</th>
-            <th>@Html.DisplayNameFor(model => model.Cost)</th>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
-            <th class="text-center">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-              
-                <strong>@item.Contract?.ContractName</strong>
-                <br />
-                <small class="text-muted">Patient: @item.Contract?.Client?.Name</small>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @item.Cost.ToString("C")
-            </td>
-            <td>
-                @{
-                    var statusClass = item.Status == "Pending" ? "bg-primary" : "bg-success";
-                }
-                <span class="badge @statusClass">@item.Status</span>
-            </td>
-             @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending") {
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                
-      <div class="flex space-x-2">
-          <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post">
-              <button type="submit" class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded-md transition-colors">Approve</button>
-          </form>
-          <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post">
-              <button type="submit" class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded-md transition-colors">Deny</button>
-          </form>
-      </div>
-  </td>
-    }
-  @if (ViewBag.AccountRole == "Client") {
-            <td class="text-center">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 700; font-size: 15px; text-align: right;">
+              @item.Cost.ToString("C")
+            </div>
+
+            @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending") {
+              <div style="display: flex; gap: 8px;">
+                <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                  <button type="submit" class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded-md transition-colors" style="background: none; border: none; font-size: 13px; font-weight: 600; cursor: pointer;">Approve</button>
+                </form>
+                <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                  <button type="submit" class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded-md transition-colors" style="background: none; border: none; font-size: 13px; font-weight: 600; cursor: pointer;">Deny</button>
+                </form>
+              </div>
+            }
+
+            @if (ViewBag.AccountRole == "Client") {
+              <div style="display: flex; gap: 4px;">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-            </td>
+              </div>
             }
-        </tr>
-}
-    </tbody>
-</table>
+          </div>
 
+        </div>
+      }
+    </div>
+  </div>
+</div>
