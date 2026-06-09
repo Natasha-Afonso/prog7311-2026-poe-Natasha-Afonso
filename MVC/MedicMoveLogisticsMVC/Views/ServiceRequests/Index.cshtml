@@ -142,102 +142,103 @@
         }
     </style>
 </head>
-<div class="card tab" id="tab-jobs" role="tabpanel">
-  <div class="hd">
-    <h2>All Jobs</h2>
-    <a asp-action="Create" class="btn btn-primary">Create New Request</a>
-  </div>
-  <div class="bd">
-    <div id="jobsList" class="list">
-      @foreach (var item in Model) {
-  <div class="list-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); gap: 16px;">
-    
-    <div style="flex: 1;">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-        <span style="font-weight: 600; font-size: 14px;">#@item.Id</span>
-        <strong>@item.Contract?.ContractName</strong>
-        
-        @{
-          // Dynamic CSS color variations matching custom logistics status states
-          var statusClass = "bg-gray-400";
-          if (item.Status == "Pending Approval") statusClass = "bg-amber-500 text-white";
-          else if (item.Status == "Approved") statusClass = "bg-blue-500 text-white";
-          else if (item.Status == "Picked Up") statusClass = "bg-indigo-500 text-white";
-          else if (item.Status == "On The Way") statusClass = "bg-purple-500 text-white";
-          else if (item.Status == "Delivered") statusClass = "bg-emerald-500 text-white";
-        }
-        <span class="px-2 py-0.5 text-xs font-semibold rounded-full @statusClass">@item.Status</span>
-      </div>
-      
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.4;">
-        <span>Patient: @item.Contract?.Client?.Name</span>
-        <span style="margin: 0 8px;">•</span>
-        <span>@item.Description</span>
-        @if (!string.IsNullOrEmpty(item.AssignedVehicleType)) {
-          <span style="margin: 0 8px;">•</span>
-          <span class="text-teal-600 font-medium">🚚 @item.AssignedVehicleType</span>
-        }
-      </div>
+<div class="wrap">
+    <div class="card tab" id="tab-jobs" role="tabpanel">
+        <div class="hd">
+            <h2>All Jobs</h2>
+            <a asp-action="Create" class="btn btn-primary">Create New Request</a>
+        </div>
+        <div class="bd">
+            <div id="jobsList" class="list">
+                @foreach (var item in Model) {
+                    <div class="list-item">
+                        
+                        <div class="item-details">
+                            <div class="item-meta-header">
+                                <span class="item-id">#@item.Id</span>
+                                <strong class="item-title">@item.Contract?.ContractName</strong>
+                                
+                                @{
+                                    var statusClass = "status-default";
+                                    if (item.Status == "Pending Approval") statusClass = "status-pending";
+                                    else if (item.Status == "Approved") statusClass = "status-approved";
+                                    else if (item.Status == "Picked Up") statusClass = "status-pickedup";
+                                    else if (item.Status == "On The Way") statusClass = "status-ontheway";
+                                    else if (item.Status == "Delivered") statusClass = "status-delivered";
+                                }
+                                <span class="pill @statusClass">@item.Status</span>
+                            </div>
+                            
+                            <div class="item-subtext">
+                                <span>Patient: @item.Contract?.Client?.Name</span>
+                                <span>•</span>
+                                <span>@item.Description</span>
+                                @if (!string.IsNullOrEmpty(item.AssignedVehicleType)) {
+                                    <span>•</span>
+                                    <span class="vehicle-indicator">🚚 @item.AssignedVehicleType</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="item-actions-zone">
+                            <div class="item-cost">
+                                @item.Cost.ToString("C")
+                            </div>
+
+                            @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending Approval") {
+                                <div class="actions-flex">
+                                    <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                                        <button type="submit" class="btn btn-ghost btn-sm" style="color: #16a34a; border-color: rgba(22,163,74,0.3);">Approve</button>
+                                    </form>
+                                    <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post" style="margin: 0;">
+                                        <button type="submit" class="btn btn-ghost btn-sm" style="color: #dc2626; border-color: rgba(220,38,38,0.3);">Deny</button>
+                                    </form>
+                                </div>
+                            }
+
+                            @if (ViewBag.AccountRole == "Client") {
+                                <div class="actions-flex">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-ghost">Edit</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-ghost">Details</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
+                            }
+
+                            @if (ViewBag.AccountRole == "Driver") {
+                                <div class="actions-flex">
+                                    @if (item.Status == "Approved") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="Picked Up" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Pick Up Cargo</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "Picked Up") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="On The Way" />
+                                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #a855f7, #9333ea);">Start Transit</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "On The Way") {
+                                        <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="nextStatus" value="Delivered" />
+                                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #10b981, #059669);">Mark Delivered</button>
+                                        </form>
+                                    }
+                                    else if (item.Status == "Delivered") {
+                                        <span class="pill status-delivered" style="gap: 4px;">
+                                            <span class="material-icons" style="font-size: 14px;">check_circle</span> Complete
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
     </div>
-
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div style="font-weight: 700; font-size: 15px; text-align: right;">
-        @item.Cost.ToString("C")
-      </div>
-
-     
-      @if (ViewBag.AccountRole == "Admin" && item.Status == "Pending Approval") {
-        <div style="display: flex; gap: 8px;">
-          <form asp-controller="Admin" asp-action="UpdateApprove" asp-route-id="@item.Id" method="post" style="margin: 0;">
-            <button type="submit" class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded-md transition-colors text-xs font-semibold cursor-pointer">Approve</button>
-          </form>
-          <form asp-controller="Admin" asp-action="UpdateDeny" asp-route-id="@item.Id" method="post" style="margin: 0;">
-            <button type="submit" class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded-md transition-colors text-xs font-semibold cursor-pointer">Deny</button>
-          </form>
-        </div>
-      }
-
-    
-      @if (ViewBag.AccountRole == "Client") {
-        <div style="display: flex; gap: 4px;">
-          <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-          <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
-          <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-        </div>
-      }
-
-
-      @if (ViewBag.AccountRole == "Driver") {
-        <div style="display: flex; gap: 8px;">
-          @if (item.Status == "Approved") {
-            <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
-              <input type="hidden" name="id" value="@item.Id" />
-              <input type="hidden" name="nextStatus" value="Picked Up" />
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer">Pick Up Cargo</button>
-            </form>
-          }
-          else if (item.Status == "Picked Up") {
-            <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
-              <input type="hidden" name="id" value="@item.Id" />
-              <input type="hidden" name="nextStatus" value="On The Way" />
-              <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer">Start Transit</button>
-            </form>
-          }
-          else if (item.Status == "On The Way") {
-            <form asp-controller="Driver" asp-action="UpdateStatus" method="post" style="margin: 0;">
-              <input type="hidden" name="id" value="@item.Id" />
-              <input type="hidden" name="nextStatus" value="Delivered" />
-              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer">Mark Delivered</button>
-            </form>
-          }
-          else if (item.Status == "Delivered") {
-            <span class="text-emerald-600 text-xs font-bold flex items-center gap-1">
-              <span class="material-icons text-sm">check_circle</span> Complete
-            </span>
-          }
-        </div>
-      }
-    </div>
-
-  </div>
-}
+</div>
