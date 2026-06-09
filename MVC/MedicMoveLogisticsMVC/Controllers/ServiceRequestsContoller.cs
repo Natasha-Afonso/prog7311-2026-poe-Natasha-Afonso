@@ -36,6 +36,12 @@ namespace MedicMoveLogisticsMVC.Controllers
             {
                 return View(search.ToList());
             }
+            else if (role == "Driver")
+            {
+                //Drivers dont see non approved stuff
+                var approvedRequests = search.Where(r => r.Status != "Pending Approval").ToList();
+                return View(approvedRequests);
+            }
             else if (role == "Client")
             {
                 //Pull the active client id saved in session
@@ -66,7 +72,7 @@ namespace MedicMoveLogisticsMVC.Controllers
 
             var contracts = await _contractService.GetAllContractsAsync(token);
 
-           ViewBag.ContractId = new SelectList(contracts, "Id", "ContractName");
+            ViewBag.ContractId = new SelectList(contracts, "Id", "ContractName");
             return View();
         }
 
@@ -78,9 +84,9 @@ namespace MedicMoveLogisticsMVC.Controllers
             {
                 try
                 {
-                 if (serviceRequest.Condition == "Cold-Chain (<9 degrees Celcius)")
+                    if (serviceRequest.Condition == "Cold-Chain (<9 degrees Celcius)")
                     {
-                    
+
                         serviceRequest.AssignedVehicleType = "Refrigerated Truck";
                     }
                     else if (serviceRequest.PackageSize == "Large")
@@ -117,22 +123,22 @@ namespace MedicMoveLogisticsMVC.Controllers
         public async Task<JsonResult> GetSpeedOptions(string contractId)
         {
             var token = HttpContext.Session.GetString("JWTToken") ?? "";
-               var optionsList =new List<object>();
-               if (!string.IsNullOrEmpty(contractId))
+            var optionsList = new List<object>();
+            if (!string.IsNullOrEmpty(contractId))
             {
                 int id = Convert.ToInt32(contractId);
-                var chosenContract = await _contractService.GetContractByIdAsync(id,token);
-            
-            //if contract is basinc restrict options
-            if (chosenContract != null && chosenContract.ServiceLevel == "Basic")
+                var chosenContract = await _contractService.GetContractByIdAsync(id, token);
+
+                //if contract is basinc restrict options
+                if (chosenContract != null && chosenContract.ServiceLevel == "Basic")
                 {
-                    optionsList.Add(new{ value = "Standard", text = "Standard Delivery (Contract Limit)"});
+                    optionsList.Add(new { value = "Standard", text = "Standard Delivery (Contract Limit)" });
                 }
                 else
                 {
-                    optionsList.Add(new {value ="Standard", text = "Standard Delivery"});
-                     optionsList.Add(new {value ="Express", text = "Express Delivery"});
-                     optionsList.Add(new {value ="Rush", text = "Rush High priority"});
+                    optionsList.Add(new { value = "Standard", text = "Standard Delivery" });
+                    optionsList.Add(new { value = "Express", text = "Express Delivery" });
+                    optionsList.Add(new { value = "Rush", text = "Rush High priority" });
                 }
             }
             return Json(optionsList);
