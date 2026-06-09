@@ -285,8 +285,6 @@ a.ssolink {
     }
 } 
 
-<<<<<<< Updated upstream
-=======
 /* codepen*/
 /* Courier service*/
 :root {
@@ -396,108 +394,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .foot { color: var(--muted); font-size: 12px; text-align:center; margin: 24px 0 60px; }
 
 .notice { border-left: 4px solid var(--accent); padding: 10px 12px; background: rgba(56,189,248,.08); border-radius: 10px; color: #0369a1; }
-
->>>>>>> Stashed changes
-
-
-/* codepen*/
-/* Courier service*/
-:root {
-      --bg: #dcf3f1;         
-      --panel: #f2faf8;
-      --muted: #a3b8cc;      
-      --text: #527160;       
-      --accent: #38bdf8;     
-      --accent-2: #60a5fa;   
-      
-      --danger: #f87171;
-      --warn: #fbbf24;
-      --ok: #34d399;
-      --radius: 18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.15);
-}
-
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-
-body {
-      margin: 0; 
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 20% -10%, #2a3b54 0%, var(--bg) 60%),
-                  radial-gradient(900px 600px at 120% 10%, #1e293b 0%, transparent 50%);
-      color: var(--text);
-    }
-    header {
-      position: sticky; top: 0; z-index: 10;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(180deg, rgba(9,14,30,.85), rgba(9,14,30,.35));
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .4px; }
-    .brand i { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0b1020; box-shadow: var(--shadow); }
-    nav { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tab-btn {
-      appearance: none; border: none; cursor: pointer; padding: 10px 14px; border-radius: 999px;
-      background: rgba(255,255,255,.06); color: var(--text);
-      border: 1px solid rgba(255,255,255,.08);
-      transition: .2s ease;
-    }
-    .tab-btn[aria-selected="true"] { background: linear-gradient(135deg, rgba(110,231,183,.25), rgba(96,165,250,.25)); border-color: rgba(255,255,255,.18); }
-    .grid { display: grid; gap: 16px; }
-    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1.2fr .8fr; } }
-
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .card h2 { margin: 0; font-size: 18px; letter-spacing: .3px; }
-    .card .hd { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .card .bd { padding: 16px; }
-
-    label { display:block; font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
-    input, select, textarea {
-      width: 100%; padding: 12px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06); color: var(--text);
-      outline: none; transition: border-color .15s ease;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-
-    .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 700px) { .row-2 { grid-template-columns: 1fr 1fr; } }
-
-    .btn { appearance: none; border: 0; cursor: pointer; padding: 12px 16px; border-radius: 12px; font-weight: 700; }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0b1020; }
-    .btn-ghost { background: rgba(255,255,255,.06); color: var(--text); border: 1px solid rgba(255,255,255,.12); }
-    .btn-danger { background: var(--danger); color: #0b1020; }
-    .btn-sm { padding: 8px 10px; border-radius: 10px; font-size: 12px; }
-
-    .pill { display:inline-flex; align-items:center; gap:8px; padding: 6px 10px; border-radius: 999px; font-size: 12px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: var(--muted); }
-    .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-    .pill.ok .dot { background: var(--ok); }
-    .pill.warn .dot { background: var(--warn); }
-    .pill.bad .dot { background: var(--danger); }
-
-    .list { display: grid; gap: 10px; }
-    .list-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); }
-    .muted { color: var(--muted); font-size: 12px; }
-
-    .timeline { display: grid; gap: 12px; }
-    .timeline .ev { display: grid; grid-template-columns: 24px 1fr; gap: 10px; }
-    .timeline .ev i { width: 24px; height: 24px; display:grid; place-items:center; border-radius:50%; background: rgba(255,255,255,.08); font-style: normal; }
-
-    .empty { text-align: center; color: var(--muted); opacity: .85; padding: 24px; }
-    .flex { display: flex; gap: 8px; align-items: center; }
-    .right { margin-left: auto; }
-    .kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
-    .code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
-    .foot { color: var(--muted); font-size: 12px; text-align:center; margin: 24px 0 60px; }
-
-    .notice { border-left: 4px solid var(--accent-2); padding: 10px 12px; background: rgba(96,165,250,.1); border-radius: 10px; }
-
 /*References
 Fadae.2025.CodePen Home.Frosted Glass User Dashboard UI – Sleek & Responsive Design.[sourcecode] Availabla at:<https://codepen.io/nimafadaei/pen/ZYbLPVe> [Accessed 20 October]
 Robert Williams.2026.SEND IT QUICK COURIER SERVICE.(Version 10)[source code]. Available at: < https://codepen.io/dasia16/pen/azvEBBp > [Accessed 5 June 2026]
